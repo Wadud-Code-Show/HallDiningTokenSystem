@@ -27,14 +27,6 @@ namespace HallDiningTokenSystem.Data
                 .Property(u => u.StudentId)
                 .HasMaxLength(50);
 
-            builder.Entity<ApplicationUser>()
-                .Property(u => u.Department)
-                .HasMaxLength(50);
-
-            builder.Entity<ApplicationUser>()
-                .Property(u => u.Batch)
-                .HasMaxLength(20);
-
             // Add unique filtered index for StudentId (only where not null)
             builder.Entity<ApplicationUser>()
                 .HasIndex(u => u.StudentId)
