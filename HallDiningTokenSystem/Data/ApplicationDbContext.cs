@@ -21,11 +21,11 @@ namespace HallDiningTokenSystem.Data
 
             builder.Entity<ApplicationUser>()
                 .Property(u => u.Department)
-                .HasMaxLength(100);
+                .HasMaxLength(50);
 
             builder.Entity<ApplicationUser>()
                 .Property(u => u.Batch)
-                .HasMaxLength(50);
+                .HasMaxLength(20);
 
             // Add unique filtered index for StudentId (only where not null)
             builder.Entity<ApplicationUser>()
