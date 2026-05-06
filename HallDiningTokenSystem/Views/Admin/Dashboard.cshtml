@@ -1,0 +1,53 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <h1 class="fw-bold mb-4">SuperAdmin Dashboard</h1>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-3">
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-plus-circle text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Create Meal</h5>
+                    <p class="card-text text-muted small">Add a new meal session to the system.</p>
+                    <a href="@Url.Action("CreateMeal", "Admin")" class="btn btn-primary btn-sm">Create Meal</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-list-ul text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">View Meals</h5>
+                    <p class="card-text text-muted small">View all meals and manage sessions.</p>
+                    <a href="@Url.Action("Meals", "Admin")" class="btn btn-primary btn-sm">View Meals</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-speedometer2 text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Reports</h5>
+                    <p class="card-text text-muted small">View system reports and analytics.</p>
+                    <a href="#" class="btn btn-primary btn-sm disabled">Reports</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

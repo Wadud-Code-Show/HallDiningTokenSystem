@@ -1,0 +1,104 @@
+@model List<MealSession>
+
+@{
+    ViewData["Title"] = "Meals";
+}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="fw-bold">Meals</h1>
+                <a href="@Url.Action("CreateMeal", "Admin")" class="btn btn-primary">+ Create Meal</a>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="row mb-3">
+            <div class="col-lg-12">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="row mb-3">
+            <div class="col-lg-12">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (Model?.Count > 0)
+    {
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="table-responsive">
+                    <table class="table table-hover border rounded-3">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Meal Name</th>
+                                <th>Price</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var meal in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@meal.Name</td>
+                                    <td>₹@meal.Price.ToString("F2")</td>
+                                    <td>@meal.StartTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                    <td>@meal.EndTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                    <td>
+                                        @if (meal.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Inactive</span>
+                                        }
+                                    </td>
+                                    <td class="text-muted small">@meal.CreatedAt.ToString("dd MMM yyyy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-inbox text-muted" style="font-size: 2.5rem;"></i>
+                        <p class="text-muted mt-3">No meals created yet.</p>
+                        <a href="@Url.Action("CreateMeal", "Admin")" class="btn btn-primary btn-sm mt-2">Create First Meal</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-outline-secondary">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>

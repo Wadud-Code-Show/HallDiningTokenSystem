@@ -1,5 +1,6 @@
 using HallDiningTokenSystem.Data;
 using HallDiningTokenSystem.Models;
+using HallDiningTokenSystem.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddScoped<DbSeeder>();
+builder.Services.AddScoped<IMealService, MealService>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();

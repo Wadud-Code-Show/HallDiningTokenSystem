@@ -1,0 +1,102 @@
+@model CreateMealViewModel
+
+@{
+    ViewData["Title"] = "Create Meal";
+}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="fw-bold mb-2">Create New Meal</h1>
+            <p class="text-muted">Add a new meal session to the system.</p>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="row mb-3">
+            <div class="col-lg-8 mx-auto">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-4">
+                    <form asp-action="CreateMeal" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label asp-for="MealName" class="form-label fw-bold"></label>
+                            <input asp-for="MealName" class="form-control" placeholder="e.g., Breakfast, Lunch, Dinner" />
+                            <span asp-validation-for="MealName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MealType" class="form-label fw-bold"></label>
+                            <input asp-for="MealType" class="form-control" placeholder="e.g., Vegetarian, Non-Vegetarian" />
+                            <span asp-validation-for="MealType" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="MealDate" class="form-label fw-bold"></label>
+                                    <input asp-for="MealDate" type="date" class="form-control" />
+                                    <span asp-validation-for="MealDate" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="SaleEndTime" class="form-label fw-bold"></label>
+                                    <input asp-for="SaleEndTime" type="datetime-local" class="form-control" />
+                                    <span asp-validation-for="SaleEndTime" class="text-danger small"></span>
+                                    <small class="text-muted d-block mt-1">Must be in the future</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Price" class="form-label fw-bold"></label>
+                                    <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                                    <span asp-validation-for="Price" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Capacity" class="form-label fw-bold"></label>
+                                    <input asp-for="Capacity" type="number" class="form-control" placeholder="Number of meals" />
+                                    <span asp-validation-for="Capacity" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-bold"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Optional meal description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Create Meal</button>
+                            <a href="@Url.Action("Meals", "Admin")" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
