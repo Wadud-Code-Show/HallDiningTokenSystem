@@ -181,6 +181,114 @@ namespace HallDiningTokenSystem.Controllers
             TempData["Success"] = $"Settlement request of ৳{request.Amount:N2} rejected.";
             return RedirectToAction("SettlementRequests");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Reports()
+        {
+            var report = new AdminReportViewModel();
+
+            // Calculate summary metrics
+            var studentUsers = await _userManager.GetUsersInRoleAsync("Student");
+            var cashAdminUsers = await _userManager.GetUsersInRoleAsync("CashAdmin");
+
+            report.TotalStudents = studentUsers.Count;
+            report.TotalCashAdmins = cashAdminUsers.Count;
+            report.TotalMeals = _context.MealSessions.Count();
+            report.TotalTokensSold = _context.MealSessions.Sum(m => m.Orders.Count);
+
+            // Calculate cash flow metrics
+            report.TotalCashCollected = _context.CashCollections.Sum(cc => cc.Amount);
+            report.TotalCashSettled = _context.CashSettlements.Sum(cs => cs.Amount);
+            report.PendingCash = report.TotalCashCollected - report.TotalCashSettled;
+            report.PendingSettlementRequests = _context.CashSettlementRequests.Count(csr => csr.Status == "Pending");
+
+            // Build CashAdmin-wise summary
+            foreach (var admin in cashAdminUsers)
+            {
+                var collected = _context.CashCollections.Where(cc => cc.CashAdminId == admin.Id).Sum(cc => cc.Amount);
+                var settled = _context.CashSettlements.Where(cs => cs.CashAdminId == admin.Id).Sum(cs => cs.Amount);
+                var pendingRequested = _context.CashSettlementRequests
+                    .Where(csr => csr.CashAdminId == admin.Id && csr.Status == "Approved")
+                    .Sum(csr => csr.Amount);
+                var pendingRequestsAmount = _context.CashSettlementRequests
+                    .Where(csr => csr.CashAdminId == admin.Id && csr.Status == "Pending")
+                    .Sum(csr => csr.Amount);
+
+                report.CashAdminSummary.Add(new CashAdminSummaryViewModel
+                {
+                    CashAdminName = admin.FullName ?? admin.UserName ?? "Unknown",
+                    CashAdminEmail = admin.Email ?? string.Empty,
+                    TotalCollected = collected,
+                    TotalSettled = settled,
+                    PendingCash = collected - settled,
+                    PendingRequestsAmount = pendingRequestsAmount
+                });
+            }
+
+            // Recent cash collections (last 10)
+            report.RecentCollections = await _context.CashCollections
+                .Include(cc => cc.CashAdmin)
+                .Include(cc => cc.WalletTransaction)
+                .Include(cc => cc.WalletTransaction.Wallet)
+                .Include(cc => cc.WalletTransaction.Wallet.User)
+                .OrderByDescending(cc => cc.CreatedAt)
+                .Take(10)
+                .Select(cc => new RecentCashCollectionViewModel
+                {
+                    CreatedAt = cc.CreatedAt,
+                    CashAdminName = cc.CashAdmin.FullName ?? cc.CashAdmin.UserName ?? "Unknown",
+                    StudentName = cc.WalletTransaction.Wallet.User.FullName ?? cc.WalletTransaction.Wallet.User.UserName ?? "Unknown",
+                    StudentId = cc.WalletTransaction.Wallet.User.StudentId ?? "N/A",
+                    Amount = cc.Amount
+                })
+                .ToListAsync();
+
+            // Recent settlement requests (last 10)
+            report.RecentSettlementRequests = await _context.CashSettlementRequests
+                .Include(csr => csr.CashAdmin)
+                .OrderByDescending(csr => csr.RequestedAt)
+                .Take(10)
+                .Select(csr => new RecentSettlementRequestViewModel
+                {
+                    RequestedAt = csr.RequestedAt,
+                    CashAdminName = csr.CashAdmin.FullName ?? csr.CashAdmin.UserName ?? "Unknown",
+                    Amount = csr.Amount,
+                    Status = csr.Status
+                })
+                .ToListAsync();
+
+            // Recent confirmed settlements (last 10)
+            report.RecentSettlements = await _context.CashSettlements
+                .Include(cs => cs.CashAdmin)
+                .Include(cs => cs.ReceivedByAdmin)
+                .OrderByDescending(cs => cs.SettlementDate)
+                .Take(10)
+                .Select(cs => new RecentSettlementViewModel
+                {
+                    SettlementDate = cs.SettlementDate,
+                    CashAdminName = cs.CashAdmin.FullName ?? cs.CashAdmin.UserName ?? "Unknown",
+                    Amount = cs.Amount,
+                    ReceivedByAdminName = cs.ReceivedByAdmin != null ? (cs.ReceivedByAdmin.FullName ?? cs.ReceivedByAdmin.UserName ?? "Unknown") : "N/A",
+                    Note = cs.Note
+                })
+                .ToListAsync();
+
+            // Meal summary
+            report.MealSummary = await _context.MealSessions
+                .OrderByDescending(m => m.StartTime)
+                .Select(m => new MealSummaryViewModel
+                {
+                    MealName = m.Name,
+                    MealType = m.Description ?? "N/A",
+                    MealDate = m.StartTime,
+                    Price = m.Price,
+                    Capacity = 0, // MealSession doesn't have Capacity field
+                    SoldCount = m.Orders.Count
+                })
+                .ToListAsync();
+
+            return View(report);
+        }
     }
 }
 
