@@ -34,7 +34,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <p class="text-muted small mb-1">Total Collected</p>
-                            <h3 class="fw-bold mb-0">৳@Model.TotalCollected.ToString("N0")</h3>
+                            <h3 class="fw-bold mb-0">৳@Model.TotalCollected.ToString("N2")</h3>
                         </div>
                         <i class="bi bi-wallet2 text-success" style="font-size: 1.5rem;"></i>
                     </div>
@@ -48,7 +48,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <p class="text-muted small mb-1">Today Collected</p>
-                            <h3 class="fw-bold mb-0">৳@Model.TodayCollected.ToString("N0")</h3>
+                            <h3 class="fw-bold mb-0">৳@Model.TodayCollected.ToString("N2")</h3>
                         </div>
                         <i class="bi bi-calendar-day text-warning" style="font-size: 1.5rem;"></i>
                     </div>
@@ -101,7 +101,7 @@
                                             <td class="fw-bold">@detail.StudentName</td>
                                             <td>@detail.StudentId</td>
                                             <td class="small">@detail.StudentEmail</td>
-                                            <td class="fw-bold">৳@detail.Amount.ToString("N0")</td>
+                                            <td class="fw-bold">৳@detail.Amount.ToString("N2")</td>
                                             <td>
                                                 @if (!string.IsNullOrEmpty(detail.Note))
                                                 {

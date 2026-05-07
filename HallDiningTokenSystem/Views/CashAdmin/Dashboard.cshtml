@@ -1,16 +1,78 @@
+@model CashAdminDashboardViewModel
+
 @{
     ViewData["Title"] = "CashAdmin Dashboard";
 }
 
-<div class="container py-5">
-    <div class="row mb-4">
+<div class="container-fluid py-5">
+    <div class="row mb-5">
         <div class="col-lg-12">
-            <h1 class="fw-bold mb-4">CashAdmin Dashboard</h1>
+            <h1 class="fw-bold">CashAdmin Dashboard</h1>
+            <p class="text-muted">Welcome back! Here's your cash collection overview.</p>
+        </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="row g-3 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Collected</p>
+                            <h3 class="fw-bold mb-0">৳@Model.TotalCollected.ToString("N2")</h3>
+                        </div>
+                        <i class="bi bi-wallet2 text-success" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Today Collected</p>
+                            <h3 class="fw-bold mb-0">৳@Model.TodayCollected.ToString("N2")</h3>
+                        </div>
+                        <i class="bi bi-calendar-day text-warning" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Top-ups</p>
+                            <h3 class="fw-bold mb-0">@Model.TotalTopUps</h3>
+                        </div>
+                        <i class="bi bi-calculator-fill text-primary" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Pending Cash</p>
+                            <h3 class="fw-bold mb-0">৳@Model.PendingCash.ToString("N2")</h3>
+                        </div>
+                        <i class="bi bi-hourglass-split text-danger" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="row g-3">
+    <div class="row g-3 mb-5">
         <div class="col-md-6 col-lg-4">
             <div class="card border-0 shadow-sm rounded-3 h-100">
                 <div class="card-body text-center">
@@ -28,11 +90,11 @@
             <div class="card border-0 shadow-sm rounded-3 h-100">
                 <div class="card-body text-center">
                     <div class="mb-3">
-                        <i class="bi bi-receipt text-primary" style="font-size: 2rem;"></i>
+                        <i class="bi bi-graph-up text-info" style="font-size: 2rem;"></i>
                     </div>
-                    <h5 class="card-title fw-bold">Cash Settlement</h5>
-                    <p class="card-text text-muted small">View and manage cash collection records.</p>
-                    <a href="#" class="btn btn-primary btn-sm disabled">View Settlement</a>
+                    <h5 class="card-title fw-bold">View Reports</h5>
+                    <p class="card-text text-muted small">View detailed cash collection and transaction reports.</p>
+                    <a href="@Url.Action("Reports", "CashAdmin")" class="btn btn-info btn-sm">View Reports</a>
                 </div>
             </div>
         </div>
@@ -41,13 +103,65 @@
             <div class="card border-0 shadow-sm rounded-3 h-100">
                 <div class="card-body text-center">
                     <div class="mb-3">
-                        <i class="bi bi-graph-up text-primary" style="font-size: 2rem;"></i>
+                        <i class="bi bi-receipt text-warning" style="font-size: 2rem;"></i>
                     </div>
-                    <h5 class="card-title fw-bold">Reports</h5>
-                    <p class="card-text text-muted small">View cash collection and transaction reports.</p>
-                    <a href="@Url.Action("Reports", "CashAdmin")" class="btn btn-primary btn-sm">View Reports</a>
+                    <h5 class="card-title fw-bold">Cash Settlement</h5>
+                    <p class="card-text text-muted small">Manage cash collection settlements and records.</p>
+                    <a href="@Url.Action("CashStatement", "CashAdmin")" class="btn btn-warning btn-sm">View Settlement</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Top-ups -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Recent Top-ups</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.RecentTopUps.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date/Time</th>
+                                        <th>Student Name</th>
+                                        <th>Student ID</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var topup in Model.RecentTopUps)
+                                    {
+                                        <tr>
+                                            <td class="small text-muted">@topup.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                            <td class="fw-bold">@topup.StudentName</td>
+                                            <td>@topup.StudentId</td>
+                                            <td class="fw-bold">৳@topup.Amount.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox text-muted" style="font-size: 2.5rem;"></i>
+                            <p class="text-muted mt-3">No top-ups yet. Start by topping up a student's wallet.</p>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

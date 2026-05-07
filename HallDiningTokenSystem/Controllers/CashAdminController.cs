@@ -23,9 +23,61 @@ namespace HallDiningTokenSystem.Controllers
         }
 
         // Dashboard
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
-            return View();
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                TempData["Error"] = "Current user not found.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Get all cash collections for current CashAdmin
+            var collections = await _context.CashCollections
+                .Where(cc => cc.CashAdminId == currentUser.Id)
+                .Include(cc => cc.Student)
+                .ToListAsync();
+
+            // Calculate metrics
+            var totalCollected = collections.Sum(cc => cc.Amount);
+            var todayCollected = collections
+                .Where(cc => cc.CreatedAt.Date == DateTime.Now.Date)
+                .Sum(cc => cc.Amount);
+            var totalTopUps = collections.Count;
+
+            // Calculate TotalSettled from CashSettlements where CashAdminId == current user
+            var totalSettled = await _context.CashSettlements
+                .Where(cs => cs.CashAdminId == currentUser.Id)
+                .SumAsync(cs => cs.Amount);
+
+            var pendingCash = totalCollected - totalSettled;
+
+            // Get recent top-ups (last 5)
+            var recentTopUps = collections
+                .OrderByDescending(cc => cc.CreatedAt)
+                .Take(5)
+                .Select(cc => new RecentTopUpViewModel
+                {
+                    Id = cc.Id,
+                    CreatedAt = cc.CreatedAt,
+                    StudentName = cc.Student?.FullName ?? "Unknown",
+                    StudentId = cc.Student?.StudentId ?? "N/A",
+                    Amount = cc.Amount
+                })
+                .ToList();
+
+            // Build view model
+            var dashboardModel = new CashAdminDashboardViewModel
+            {
+                TotalCollected = totalCollected,
+                TodayCollected = todayCollected,
+                TotalTopUps = totalTopUps,
+                TotalSettled = totalSettled,
+                PendingCash = pendingCash,
+                RecentTopUps = recentTopUps
+            };
+
+            return View(dashboardModel);
         }
 
         // Top Up Wallet GET
