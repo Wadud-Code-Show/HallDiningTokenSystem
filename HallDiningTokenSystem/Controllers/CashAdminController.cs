@@ -1,8 +1,10 @@
+using HallDiningTokenSystem.Data;
 using HallDiningTokenSystem.Models;
 using HallDiningTokenSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HallDiningTokenSystem.Controllers
 {
@@ -11,11 +13,13 @@ namespace HallDiningTokenSystem.Controllers
     {
         private readonly IWalletService _walletService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationDbContext _context;
 
-        public CashAdminController(IWalletService walletService, UserManager<ApplicationUser> userManager)
+        public CashAdminController(IWalletService walletService, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
         {
             _walletService = walletService;
             _userManager = userManager;
+            _context = context;
         }
 
         // Dashboard
@@ -107,6 +111,53 @@ namespace HallDiningTokenSystem.Controllers
                 TempData["Error"] = result.Message;
                 return View(model);
             }
+        }
+
+        // Reports GET
+        public async Task<IActionResult> Reports()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                TempData["Error"] = "Current user not found.";
+                return RedirectToAction("Dashboard");
+            }
+
+            // Get all cash collections for current CashAdmin with student and transaction details
+            var collections = await _context.CashCollections
+                .Where(cc => cc.CashAdminId == currentUser.Id)
+                .Include(cc => cc.Student)
+                .Include(cc => cc.WalletTransaction)
+                .OrderByDescending(cc => cc.CreatedAt)
+                .ToListAsync();
+
+            // Build view model
+            var reportModel = new CashAdminReportViewModel
+            {
+                TotalTopUps = collections.Count,
+                TotalCollected = collections.Sum(cc => cc.Amount),
+                TodayCollected = collections
+                    .Where(cc => cc.CreatedAt.Date == DateTime.Now.Date)
+                    .Sum(cc => cc.Amount),
+                TotalStudentsServed = collections
+                    .Select(cc => cc.StudentId)
+                    .Distinct()
+                    .Count(),
+                CollectionDetails = collections
+                    .Select(cc => new CashCollectionDetailViewModel
+                    {
+                        Id = cc.Id,
+                        CreatedAt = cc.CreatedAt,
+                        StudentName = cc.Student?.FullName ?? "Unknown",
+                        StudentId = cc.Student?.StudentId ?? "N/A",
+                        StudentEmail = cc.Student?.Email ?? "N/A",
+                        Amount = cc.Amount,
+                        Note = cc.WalletTransaction?.Description
+                    })
+                    .ToList()
+            };
+
+            return View(reportModel);
         }
     }
 }

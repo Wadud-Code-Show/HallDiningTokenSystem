@@ -1,0 +1,145 @@
+@model CashAdminReportViewModel
+
+@{
+    ViewData["Title"] = "Cash Collection Reports";
+}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <h1 class="fw-bold mb-2">Cash Collection Reports</h1>
+            <p class="text-muted">View your cash collection statistics and transaction details.</p>
+        </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="row g-3 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Top-ups</p>
+                            <h3 class="fw-bold mb-0">@Model.TotalTopUps</h3>
+                        </div>
+                        <i class="bi bi-calculator-fill text-primary" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Collected</p>
+                            <h3 class="fw-bold mb-0">৳@Model.TotalCollected.ToString("N0")</h3>
+                        </div>
+                        <i class="bi bi-wallet2 text-success" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Today Collected</p>
+                            <h3 class="fw-bold mb-0">৳@Model.TodayCollected.ToString("N0")</h3>
+                        </div>
+                        <i class="bi bi-calendar-day text-warning" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Students Served</p>
+                            <h3 class="fw-bold mb-0">@Model.TotalStudentsServed</h3>
+                        </div>
+                        <i class="bi bi-people-fill text-info" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Report Table -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Transaction Details</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.CollectionDetails.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date/Time</th>
+                                        <th>Student Name</th>
+                                        <th>Student ID</th>
+                                        <th>Email</th>
+                                        <th>Amount</th>
+                                        <th>Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var detail in Model.CollectionDetails)
+                                    {
+                                        <tr>
+                                            <td class="small">@detail.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                            <td class="fw-bold">@detail.StudentName</td>
+                                            <td>@detail.StudentId</td>
+                                            <td class="small">@detail.StudentEmail</td>
+                                            <td class="fw-bold">৳@detail.Amount.ToString("N0")</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(detail.Note))
+                                                {
+                                                    <span class="badge bg-info">@detail.Note</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">—</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox text-muted" style="font-size: 2.5rem;"></i>
+                            <p class="text-muted mt-3">No cash collection records found.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <a href="@Url.Action("Dashboard", "CashAdmin")" class="btn btn-outline-secondary">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
