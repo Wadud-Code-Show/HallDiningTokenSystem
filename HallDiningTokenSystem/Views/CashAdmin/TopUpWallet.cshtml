@@ -83,7 +83,7 @@
                                         <strong>Email:</strong> @Model.StudentEmail
                                     </div>
                                     <div class="col-md-6 mb-2">
-                                        <strong>Current Balance:</strong> <span class="badge bg-info">₹@Model.CurrentBalance.ToString("F2")</span>
+                                        <strong>Current Balance:</strong> <span class="badge bg-info">৳@Model.CurrentBalance.ToString("N0")</span>
                                     </div>
                                 </div>
                             </div>
@@ -95,7 +95,7 @@
                                 <div class="mb-3">
                                     <label asp-for="Amount" class="form-label fw-bold"></label>
                                     <div class="input-group">
-                                        <span class="input-group-text">₹</span>
+                                        <span class="input-group-text">৳</span>
                                         <input asp-for="Amount" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" class="form-control" placeholder="0" />
                                     </div>
                                     <span asp-validation-for="Amount" class="text-danger small d-block mt-1"></span>

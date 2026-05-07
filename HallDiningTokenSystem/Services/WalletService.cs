@@ -93,7 +93,7 @@ namespace HallDiningTokenSystem.Services
                     await transaction.CommitAsync();
 
                     return ServiceResult.SuccessResult(
-                        $"Wallet top-up successful. Added ₹{amount:F2} to {student.FullName}'s wallet.",
+                        $"Wallet top-up successful. Added ৳{amount:N0} to {student.FullName}'s wallet.",
                         new { Student = student, Wallet = wallet }
                     );
                 }
