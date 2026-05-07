@@ -211,5 +211,198 @@ namespace HallDiningTokenSystem.Controllers
 
             return View(reportModel);
         }
+
+        // Cash Statement GET
+        public async Task<IActionResult> CashStatement()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                TempData["Error"] = "Current user not found.";
+                return RedirectToAction("Dashboard");
+            }
+
+            // Get all cash collections for current CashAdmin
+            var collections = await _context.CashCollections
+                .Where(cc => cc.CashAdminId == currentUser.Id)
+                .Include(cc => cc.Student)
+                .Include(cc => cc.WalletTransaction)
+                .OrderByDescending(cc => cc.CreatedAt)
+                .ToListAsync();
+
+            // Get all cash settlements for current CashAdmin
+            var settlements = await _context.CashSettlements
+                .Where(cs => cs.CashAdminId == currentUser.Id)
+                .Include(cs => cs.ReceivedByAdmin)
+                .OrderByDescending(cs => cs.SettlementDate)
+                .ToListAsync();
+
+            // Get all cash settlement requests for current CashAdmin
+            var settlementRequests = await _context.CashSettlementRequests
+                .Where(csr => csr.CashAdminId == currentUser.Id)
+                .OrderByDescending(csr => csr.RequestedAt)
+                .ToListAsync();
+
+            // Calculate metrics
+            var totalCollected = collections.Sum(cc => cc.Amount);
+            var totalSettled = settlements.Sum(cs => cs.Amount);
+            var pendingRequested = settlementRequests.Where(csr => csr.Status == "Pending").Sum(csr => csr.Amount);
+            var pendingCash = totalCollected - totalSettled;
+            var availablePendingCash = pendingCash - pendingRequested;
+            var totalTopUps = collections.Count;
+
+            // Build view model
+            var statementModel = new CashStatementViewModel
+            {
+                TotalCollected = totalCollected,
+                TotalSettled = totalSettled,
+                PendingRequested = pendingRequested,
+                AvailablePendingCash = availablePendingCash,
+                PendingCash = pendingCash,
+                TotalTopUps = totalTopUps,
+                RecentCollections = collections
+                    .Select(cc => new CashCollectionItemViewModel
+                    {
+                        Id = cc.Id,
+                        CreatedAt = cc.CreatedAt,
+                        StudentName = cc.Student?.FullName ?? "Unknown",
+                        StudentId = cc.Student?.StudentId ?? "N/A",
+                        StudentEmail = cc.Student?.Email ?? "N/A",
+                        Amount = cc.Amount,
+                        Note = cc.WalletTransaction?.Description
+                    })
+                    .ToList(),
+                SettlementHistory = settlements
+                    .Select(cs => new SettlementHistoryItemViewModel
+                    {
+                        Id = cs.Id,
+                        SettlementDate = cs.SettlementDate,
+                        Amount = cs.Amount,
+                        ReceivedByAdminName = cs.ReceivedByAdmin?.FullName ?? "Unknown",
+                        Note = cs.Note
+                    })
+                    .ToList(),
+                SettlementRequests = settlementRequests
+                    .Select(csr => new SettlementRequestHistoryItemViewModel
+                    {
+                        Id = csr.Id,
+                        RequestedAt = csr.RequestedAt,
+                        Amount = csr.Amount,
+                        Status = csr.Status,
+                        RequestNote = csr.RequestNote,
+                        ReviewedAt = csr.ReviewedAt,
+                        AdminNote = csr.AdminNote
+                    })
+                    .ToList()
+            };
+
+            return View(statementModel);
+        }
+
+        // Request Settlement GET
+        public async Task<IActionResult> RequestSettlement()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                TempData["Error"] = "Current user not found.";
+                return RedirectToAction("Dashboard");
+            }
+
+            // Calculate available pending cash
+            var collections = await _context.CashCollections
+                .Where(cc => cc.CashAdminId == currentUser.Id)
+                .ToListAsync();
+
+            var settlements = await _context.CashSettlements
+                .Where(cs => cs.CashAdminId == currentUser.Id)
+                .ToListAsync();
+
+            var pendingRequests = await _context.CashSettlementRequests
+                .Where(csr => csr.CashAdminId == currentUser.Id && csr.Status == "Pending")
+                .ToListAsync();
+
+            var totalCollected = collections.Sum(cc => cc.Amount);
+            var totalSettled = settlements.Sum(cs => cs.Amount);
+            var pendingRequestedAmount = pendingRequests.Sum(csr => csr.Amount);
+            var availablePendingCash = totalCollected - totalSettled - pendingRequestedAmount;
+
+            // Store in ViewData for view
+            ViewData["TotalCollected"] = totalCollected;
+            ViewData["TotalSettled"] = totalSettled;
+            ViewData["PendingRequested"] = pendingRequestedAmount;
+            ViewData["AvailablePendingCash"] = availablePendingCash;
+
+            return View(new RequestSettlementInputViewModel());
+        }
+
+        // Request Settlement POST
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RequestSettlement(RequestSettlementInputViewModel model)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                TempData["Error"] = "Current user not found.";
+                return RedirectToAction("Dashboard");
+            }
+
+            // Calculate available pending cash
+            var collections = await _context.CashCollections
+                .Where(cc => cc.CashAdminId == currentUser.Id)
+                .ToListAsync();
+
+            var settlements = await _context.CashSettlements
+                .Where(cs => cs.CashAdminId == currentUser.Id)
+                .ToListAsync();
+
+            var pendingRequests = await _context.CashSettlementRequests
+                .Where(csr => csr.CashAdminId == currentUser.Id && csr.Status == "Pending")
+                .ToListAsync();
+
+            var totalCollected = collections.Sum(cc => cc.Amount);
+            var totalSettled = settlements.Sum(cs => cs.Amount);
+            var pendingRequestedAmount = pendingRequests.Sum(csr => csr.Amount);
+            var availablePendingCash = totalCollected - totalSettled - pendingRequestedAmount;
+
+            // Validate amount
+            if (model.Amount <= 0)
+            {
+                TempData["Error"] = "Settlement amount must be greater than 0.";
+                ViewData["TotalCollected"] = totalCollected;
+                ViewData["TotalSettled"] = totalSettled;
+                ViewData["PendingRequested"] = pendingRequestedAmount;
+                ViewData["AvailablePendingCash"] = availablePendingCash;
+                return View(model);
+            }
+
+            if (model.Amount > availablePendingCash)
+            {
+                TempData["Error"] = $"Settlement amount cannot exceed available pending cash (৳{availablePendingCash:N2}).";
+                ViewData["TotalCollected"] = totalCollected;
+                ViewData["TotalSettled"] = totalSettled;
+                ViewData["PendingRequested"] = pendingRequestedAmount;
+                ViewData["AvailablePendingCash"] = availablePendingCash;
+                return View(model);
+            }
+
+            // Create settlement request
+            var request = new CashSettlementRequest
+            {
+                CashAdminId = currentUser.Id,
+                Amount = model.Amount,
+                Status = "Pending",
+                RequestNote = model.RequestNote,
+                RequestedAt = DateTime.Now
+            };
+
+            _context.CashSettlementRequests.Add(request);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Settlement request of ৳{model.Amount:N2} created. Awaiting SuperAdmin approval.";
+            return RedirectToAction("CashStatement");
+        }
     }
 }
+

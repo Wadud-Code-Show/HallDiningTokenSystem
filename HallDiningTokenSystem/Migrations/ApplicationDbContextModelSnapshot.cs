@@ -169,6 +169,54 @@ namespace HallDiningTokenSystem.Migrations
                     b.ToTable("CashSettlements");
                 });
 
+            modelBuilder.Entity("HallDiningTokenSystem.Models.CashSettlementRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AdminNote")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CashAdminId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("CashSettlementId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RequestNote")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReviewedByAdminId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CashAdminId");
+
+                    b.HasIndex("CashSettlementId");
+
+                    b.HasIndex("ReviewedByAdminId");
+
+                    b.ToTable("CashSettlementRequests");
+                });
+
             modelBuilder.Entity("HallDiningTokenSystem.Models.MealSession", b =>
                 {
                     b.Property<int>("Id")
@@ -520,6 +568,34 @@ namespace HallDiningTokenSystem.Migrations
                     b.Navigation("CashAdmin");
 
                     b.Navigation("ReceivedByAdmin");
+                });
+
+            modelBuilder.Entity("HallDiningTokenSystem.Models.CashSettlementRequest", b =>
+                {
+                    b.HasOne("HallDiningTokenSystem.Models.ApplicationUser", "CashAdmin")
+                        .WithMany()
+                        .HasForeignKey("CashAdminId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_CashSettlementRequest_CashAdmin");
+
+                    b.HasOne("HallDiningTokenSystem.Models.CashSettlement", "CashSettlement")
+                        .WithMany()
+                        .HasForeignKey("CashSettlementId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_CashSettlementRequest_CashSettlement");
+
+                    b.HasOne("HallDiningTokenSystem.Models.ApplicationUser", "ReviewedByAdmin")
+                        .WithMany()
+                        .HasForeignKey("ReviewedByAdminId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_CashSettlementRequest_ReviewedByAdmin");
+
+                    b.Navigation("CashAdmin");
+
+                    b.Navigation("CashSettlement");
+
+                    b.Navigation("ReviewedByAdmin");
                 });
 
             modelBuilder.Entity("HallDiningTokenSystem.Models.MealToken", b =>

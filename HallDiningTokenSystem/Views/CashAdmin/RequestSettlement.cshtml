@@ -1,0 +1,144 @@
+@model RequestSettlementInputViewModel
+
+@{
+    ViewData["Title"] = "Request Settlement";
+    var totalCollected = (decimal?)ViewData["TotalCollected"] ?? 0;
+    var totalSettled = (decimal?)ViewData["TotalSettled"] ?? 0;
+    var pendingRequested = (decimal?)ViewData["PendingRequested"] ?? 0;
+    var availablePendingCash = (decimal?)ViewData["AvailablePendingCash"] ?? 0;
+}
+
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="fw-bold mb-2">Request Settlement</h1>
+            <p class="text-muted">Request to settle your pending cash with the SuperAdmin.</p>
+        </div>
+    </div>
+
+    <!-- Cash Status Cards -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Total Collected</p>
+                            <h4 class="fw-bold mb-0">৳@totalCollected.ToString("N2")</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Total Settled</p>
+                            <h4 class="fw-bold mb-0">৳@totalSettled.ToString("N2")</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Pending Requested</p>
+                            <h4 class="fw-bold mb-0">৳@pendingRequested.ToString("N2")</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-3 h-100 bg-light">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Available Pending Cash</p>
+                            <h4 class="fw-bold mb-0">৳@availablePendingCash.ToString("N2")</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settlement Request Form -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Request Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate class="needs-validation">
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <strong>Please fix the following errors:</strong>
+                                <ul class="mb-0 mt-2">
+                                    @foreach (var modelState in ViewData.ModelState.Values)
+                                    {
+                                        @foreach (var error in modelState.Errors)
+                                        {
+                                            <li>@error.ErrorMessage</li>
+                                        }
+                                    }
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+
+                        <div class="mb-4">
+                            <label for="Amount" class="form-label fw-bold">Settlement Amount <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">৳</span>
+                                <input type="text" id="Amount" name="Amount" class="form-control" 
+                                       inputmode="numeric" pattern="[0-9]*" autocomplete="off"
+                                       placeholder="Enter amount" required />
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                Maximum: ৳@availablePendingCash.ToString("N2")
+                            </small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="RequestNote" class="form-label fw-bold">Request Note</label>
+                            <textarea id="RequestNote" name="RequestNote" class="form-control" 
+                                      rows="3" placeholder="Optional note for SuperAdmin"></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("CashStatement", "CashAdmin")" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Submit Request</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Alert -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle"></i>
+                <strong>How it works:</strong> Once you submit a settlement request, it will be sent to the SuperAdmin for review. They will verify the amount and create a settlement record after receiving the physical cash.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Allow only numeric input
+        document.getElementById('Amount').addEventListener('keypress', function(event) {
+            if (!/[0-9]/.test(event.key)) {
+                event.preventDefault();
+            }
+        });
+        document.getElementById('Amount').addEventListener('paste', function(event) {
+            event.preventDefault();
+        });
+    </script>
+}

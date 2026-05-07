@@ -13,6 +13,7 @@ namespace HallDiningTokenSystem.Data
         public DbSet<MealToken> MealTokens { get; set; }
         public DbSet<CashCollection> CashCollections { get; set; }
         public DbSet<CashSettlement> CashSettlements { get; set; }
+        public DbSet<CashSettlementRequest> CashSettlementRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -103,6 +104,30 @@ namespace HallDiningTokenSystem.Data
                 .HasForeignKey(cs => cs.ReceivedByAdminId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_CashSettlement_ReceivedByAdmin");
+
+            // Configure CashSettlementRequest relationships
+            builder.Entity<CashSettlementRequest>()
+                .HasOne(csr => csr.CashAdmin)
+                .WithMany()
+                .HasForeignKey(csr => csr.CashAdminId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_CashSettlementRequest_CashAdmin");
+
+            builder.Entity<CashSettlementRequest>()
+                .HasOne(csr => csr.ReviewedByAdmin)
+                .WithMany()
+                .HasForeignKey(csr => csr.ReviewedByAdminId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false)
+                .HasConstraintName("FK_CashSettlementRequest_ReviewedByAdmin");
+
+            builder.Entity<CashSettlementRequest>()
+                .HasOne(csr => csr.CashSettlement)
+                .WithMany()
+                .HasForeignKey(csr => csr.CashSettlementId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false)
+                .HasConstraintName("FK_CashSettlementRequest_CashSettlement");
         }
     }
 }

@@ -1,0 +1,283 @@
+@model CashStatementViewModel
+
+@{
+    ViewData["Title"] = "Cash Statement";
+}
+
+<div class="container-fluid py-5">
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h1 class="fw-bold">Cash Statement</h1>
+                    <p class="text-muted">View your cash collection and settlement status.</p>
+                </div>
+                <a href="@Url.Action("RequestSettlement", "CashAdmin")" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Request Settlement
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="row g-3 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Collected</p>
+                            <h3 class="fw-bold mb-0">৳@Model.TotalCollected.ToString("N2")</h3>
+                        </div>
+                        <i class="bi bi-wallet2 text-success" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Settled</p>
+                            <h3 class="fw-bold mb-0">৳@Model.TotalSettled.ToString("N2")</h3>
+                        </div>
+                        <i class="bi bi-check-circle text-info" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Pending Requested</p>
+                            <h3 class="fw-bold mb-0">৳@Model.PendingRequested.ToString("N2")</h3>
+                        </div>
+                        <i class="bi bi-hourglass-split text-warning" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Available Pending Cash</p>
+                            <h3 class="fw-bold mb-0">৳@Model.AvailablePendingCash.ToString("N2")</h3>
+                        </div>
+                        <i class="bi bi-cash-coin text-primary" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settlement Requests -->
+    @if (Model.SettlementRequests.Count > 0)
+    {
+        <div class="row mb-5">
+            <div class="col-lg-12">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                        <h5 class="fw-bold mb-0">Settlement Request History</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date/Time</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Note</th>
+                                        <th>Reviewed At</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var request in Model.SettlementRequests)
+                                    {
+                                        <tr>
+                                            <td class="small text-muted">@request.RequestedAt.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                            <td class="fw-bold">৳@request.Amount.ToString("N2")</td>
+                                            <td>
+                                                @if (request.Status == "Pending")
+                                                {
+                                                    <span class="badge bg-warning">Pending</span>
+                                                }
+                                                else if (request.Status == "Approved")
+                                                {
+                                                    <span class="badge bg-success">Approved</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Rejected</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(request.RequestNote))
+                                                {
+                                                    <span class="badge bg-info">@request.RequestNote</span>
+                                                }
+                                                else if (!string.IsNullOrEmpty(request.AdminNote))
+                                                {
+                                                    <span class="badge bg-secondary">@request.AdminNote</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">—</span>
+                                                }
+                                            </td>
+                                            <td class="small text-muted">
+                                                @if (request.ReviewedAt.HasValue)
+                                                {
+                                                    @request.ReviewedAt.Value.ToString("dd MMM yyyy, hh:mm tt")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">—</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Recent Cash Collections -->
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Recent Cash Collections</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.RecentCollections.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date/Time</th>
+                                        <th>Student Name</th>
+                                        <th>Student ID</th>
+                                        <th>Student Email</th>
+                                        <th>Amount</th>
+                                        <th>Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var collection in Model.RecentCollections)
+                                    {
+                                        <tr>
+                                            <td class="small text-muted">@collection.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                            <td class="fw-bold">@collection.StudentName</td>
+                                            <td>@collection.StudentId</td>
+                                            <td class="small">@collection.StudentEmail</td>
+                                            <td class="fw-bold">৳@collection.Amount.ToString("N2")</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(collection.Note))
+                                                {
+                                                    <span class="badge bg-info">@collection.Note</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">—</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox text-muted" style="font-size: 2.5rem;"></i>
+                            <p class="text-muted mt-3">No cash collections yet.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settlement History -->
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Settlement History</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.SettlementHistory.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date/Time</th>
+                                        <th>Amount</th>
+                                        <th>Received By</th>
+                                        <th>Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var settlement in Model.SettlementHistory)
+                                    {
+                                        <tr>
+                                            <td class="small text-muted">@settlement.SettlementDate.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                            <td class="fw-bold">৳@settlement.Amount.ToString("N2")</td>
+                                            <td>@settlement.ReceivedByAdminName</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(settlement.Note))
+                                                {
+                                                    <span class="badge bg-success">@settlement.Note</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">—</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox text-muted" style="font-size: 2.5rem;"></i>
+                            <p class="text-muted mt-3">No settlements yet. Contact your administrator to settle cash.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <a href="@Url.Action("Dashboard", "CashAdmin")" class="btn btn-outline-secondary">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
