@@ -17,6 +17,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddScoped<DbSeeder>();
 builder.Services.AddScoped<IMealService, MealService>();
+builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();

@@ -1,0 +1,195 @@
+@model WalletTopUpViewModel
+
+@{
+    ViewData["Title"] = "Top-up Student Wallet";
+}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="fw-bold mb-2">Top-up Student Wallet</h1>
+            <p class="text-muted">Search for a student by ID and add balance to their wallet.</p>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="row mb-3">
+            <div class="col-lg-8 mx-auto">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="row mb-3">
+            <div class="col-lg-8 mx-auto">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-4">
+                    <!-- Search Form (Step 1) -->
+                    <form asp-action="SearchStudent" asp-controller="CashAdmin" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-3">Step 1: Search Student</h5>
+                            <div class="mb-3">
+                                <label asp-for="StudentId" class="form-label fw-bold">Student ID (6 digits)</label>
+                                <div class="input-group">
+                                    <input asp-for="StudentId" class="form-control" placeholder="e.g., 220130" />
+                                    <button class="btn btn-outline-primary" type="submit">Search</button>
+                                </div>
+                                <span asp-validation-for="StudentId" class="text-danger small d-block mt-1"></span>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Top-up Form (Step 2 - only shown after search) -->
+                    @if (!string.IsNullOrEmpty(Model.StudentUserId))
+                    {
+                        <form asp-action="TopUpWallet" asp-controller="CashAdmin" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <!-- Hidden fields for internal state -->
+                            <input type="hidden" asp-for="StudentUserId" />
+                            <input type="hidden" asp-for="StudentId" />
+                            <input type="hidden" asp-for="StudentName" />
+                            <input type="hidden" asp-for="StudentEmail" />
+                            <input type="hidden" asp-for="CurrentBalance" />
+
+                            <div class="mb-4 p-3 bg-light rounded-2">
+                                <h5 class="fw-bold mb-3">Student Details</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <strong>Full Name:</strong> @Model.StudentName
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <strong>Student ID:</strong> @Model.StudentId
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <strong>Email:</strong> @Model.StudentEmail
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <strong>Current Balance:</strong> <span class="badge bg-info">₹@Model.CurrentBalance.ToString("F2")</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4" />
+
+                            <div class="mb-4">
+                                <h5 class="fw-bold mb-3">Step 2: Enter Top-up Amount</h5>
+                                <div class="mb-3">
+                                    <label asp-for="Amount" class="form-label fw-bold"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        <input asp-for="Amount" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" class="form-control" placeholder="0" />
+                                    </div>
+                                    <span asp-validation-for="Amount" class="text-danger small d-block mt-1"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Note" class="form-label fw-bold"></label>
+                                    <textarea asp-for="Note" class="form-control" rows="2" placeholder="Optional: Add a note (e.g., Payment for month of July)"></textarea>
+                                    <span asp-validation-for="Note" class="text-danger small d-block mt-1"></span>
+                                </div>
+                            </div>
+
+                            <hr class="my-4" />
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" id="confirmButton" class="btn btn-primary">Confirm Top-up</button>
+                                <a href="@Url.Action("TopUpWallet", "CashAdmin")" class="btn btn-outline-secondary">Clear & Search Again</a>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-search" style="font-size: 2rem;"></i>
+                            <p class="mt-2">Enter a student ID and click Search to get started.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-lg-8 mx-auto">
+            <a href="@Url.Action("Dashboard", "CashAdmin")" class="btn btn-outline-secondary">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Prevent mouse wheel from changing number input values
+        document.addEventListener('DOMContentLoaded', function() {
+            // Find the Amount input field and prevent wheel events
+            var amountInput = document.querySelector('input[name="Amount"]');
+            if (amountInput) {
+                amountInput.addEventListener('wheel', function(e) {
+                    e.preventDefault();
+                });
+            }
+
+            // Also prevent wheel on any number inputs as a safety measure
+            var numberInputs = document.querySelectorAll('input[type="number"]');
+            numberInputs.forEach(function(input) {
+                input.addEventListener('wheel', function(e) {
+                    e.preventDefault();
+                });
+            });
+        });
+
+        // Prevent double form submission on Confirm Top-up button
+        // TEMPORARILY DISABLED - waiting for form submission fix
+        /*
+        document.addEventListener('DOMContentLoaded', function() {
+            var confirmButton = document.getElementById('confirmButton');
+            if (confirmButton) {
+                confirmButton.addEventListener('click', function(e) {
+                    // Check if button is already disabled (already submitted)
+                    if (confirmButton.disabled) {
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    // Disable button to prevent double-click
+                    confirmButton.disabled = true;
+
+                    // Show loading state
+                    var originalText = confirmButton.textContent;
+                    confirmButton.textContent = 'Processing...';
+                    confirmButton.classList.add('opacity-50');
+
+                    // Re-enable button after 5 seconds (in case of network failure)
+                    setTimeout(function() {
+                        confirmButton.disabled = false;
+                        confirmButton.textContent = originalText;
+                        confirmButton.classList.remove('opacity-50');
+                    }, 5000);
+                });
+            }
+        });
+        */
+    </script>
+}

@@ -35,6 +35,15 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Meals">Meal List</a>
                             </li>
                         }
+                        @if (User.IsInRole("CashAdmin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="CashAdmin" asp-action="Dashboard">CashAdmin Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="CashAdmin" asp-action="TopUpWallet">Top-up Wallet</a>
+                            </li>
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
