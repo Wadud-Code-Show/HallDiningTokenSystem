@@ -1,0 +1,174 @@
+@model EditMealViewModel
+
+@{
+    ViewData["Title"] = "Edit Meal";
+}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="fw-bold mb-2">Edit Meal</h1>
+            <p class="text-muted">Update meal details with business rule protection.</p>
+        </div>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Count > 0)
+    {
+        <div class="row mb-4">
+            <div class="col-lg-8 mx-auto">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Please fix the following errors:</strong>
+                    <ul class="mb-0 mt-2">
+                        @foreach (var modelState in ViewData.ModelState.Values)
+                        {
+                            @foreach (var error in modelState.Errors)
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        }
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (Model.SoldCount > 0)
+    {
+        <div class="row mb-4">
+            <div class="col-lg-8 mx-auto">
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Field Restrictions Active</strong>
+                    <p class="mb-0 mt-2">
+                        Some fields are locked because @Model.SoldCount token(s) have already been sold.
+                        Price and Start Time cannot be modified.
+                    </p>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Meal Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate class="needs-validation">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="SoldCount" />
+
+                        <!-- Meal Name -->
+                        <div class="mb-4">
+                            <label asp-for="MealName" class="form-label fw-bold">Meal Name <span class="text-danger">*</span></label>
+                            <input asp-for="MealName" class="form-control" placeholder="e.g., Breakfast, Lunch, Dinner" />
+                            <span asp-validation-for="MealName" class="text-danger small d-block mt-1"></span>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="mb-4">
+                            @if (Model.SoldCount > 0)
+                            {
+                                <label asp-for="Price" class="form-label fw-bold">Price <span class="text-danger">*</span> <span class="badge bg-warning text-dark">Locked</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">৳</span>
+                                    <input asp-for="Price" class="form-control" disabled />
+                                </div>
+                                <small class="text-muted d-block mt-2">
+                                    This field is locked because tokens were already sold.
+                                </small>
+                            }
+                            else
+                            {
+                                <label asp-for="Price" class="form-label fw-bold">Price <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">৳</span>
+                                    <input asp-for="Price" class="form-control" placeholder="0.00" />
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger small d-block mt-1"></span>
+                            }
+                        </div>
+
+                        <!-- Start Time -->
+                        <div class="mb-4">
+                            @if (Model.SoldCount > 0)
+                            {
+                                <label asp-for="StartTime" class="form-label fw-bold">Start Time <span class="text-danger">*</span> <span class="badge bg-warning text-dark">Locked</span></label>
+                                <input asp-for="StartTime" type="datetime-local" class="form-control" disabled />
+                                <small class="text-muted d-block mt-2">
+                                    This field is locked because tokens were already sold.
+                                </small>
+                            }
+                            else
+                            {
+                                <label asp-for="StartTime" class="form-label fw-bold">Start Time <span class="text-danger">*</span></label>
+                                <input asp-for="StartTime" type="datetime-local" class="form-control" />
+                                <span asp-validation-for="StartTime" class="text-danger small d-block mt-1"></span>
+                            }
+                        </div>
+
+                        <!-- End Time -->
+                        <div class="mb-4">
+                            <label asp-for="EndTime" class="form-label fw-bold">End Time <span class="text-danger">*</span></label>
+                            <input asp-for="EndTime" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="EndTime" class="text-danger small d-block mt-1"></span>
+                            <small class="text-muted d-block mt-2">
+                                Must be after the start time.
+                            </small>
+                        </div>
+
+                        <!-- Capacity (Read-only) -->
+                        <div class="mb-4">
+                            <label asp-for="Capacity" class="form-label fw-bold">Capacity <span class="text-danger">*</span></label>
+                            <input asp-for="Capacity" type="number" class="form-control" disabled />
+                            <small class="text-muted d-block mt-2">
+                                Capacity is currently not editable.
+                            </small>
+                        </div>
+
+                        <!-- Sold Count (Display only) -->
+                        @if (Model.SoldCount > 0)
+                        {
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Tokens Sold</label>
+                                <div class="alert alert-info">
+                                    <strong>@Model.SoldCount</strong> token(s) have been sold for this meal.
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("Meals", "Admin")" class="btn btn-outline-secondary">Back to Meals</a>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Alert -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle"></i>
+                <strong>Edit Rules:</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Expired meals cannot be edited.</li>
+                    <li>If tokens are sold, Price and Start Time are locked for financial integrity.</li>
+                    <li>End Time can always be adjusted (to extend or close sales).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

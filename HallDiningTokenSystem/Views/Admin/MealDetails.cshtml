@@ -1,0 +1,278 @@
+@model MealDetailsViewModel
+
+@{
+    ViewData["Title"] = "Meal Details - " + Model?.MealName;
+}
+
+<div class="container-fluid py-5">
+    <!-- Header Section with Status -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold">@Model?.MealName</h1>
+                    <span class="badge @Model?.GetStatusBadgeClass() fs-6 mt-2">@Model?.CurrentStatus</span>
+                </div>
+                <div>
+                    <small class="text-muted d-block">Created: @Model?.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="row mb-3">
+            <div class="col-lg-12">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="row mb-3">
+            <div class="col-lg-12">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Basic Information Card -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Basic Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1">Meal Name</p>
+                            <p class="fw-bold">@Model?.MealName</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1">Price</p>
+                            <p class="fw-bold">৳@Model?.Price.ToString("N2")</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1">Capacity</p>
+                            <p class="fw-bold">@(Model?.Capacity > 0 ? Model?.Capacity.ToString() : "Unlimited")</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1">Sold Count</p>
+                            <p class="fw-bold text-info">@Model?.SoldCount</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="text-muted small mb-1">Remaining Capacity</p>
+                            <p class="fw-bold text-success">
+                                @if (Model?.Capacity > 0)
+                                {
+                                    @Model?.RemainingCapacity
+                                }
+                                else
+                                {
+                                    <span>Unlimited</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Card -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <p class="text-muted small mb-1">Start Time</p>
+                            <p class="fw-bold">@Model?.StartTime.ToString("dd MMM yyyy, hh:mm tt")</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <p class="text-muted small mb-1">End Time</p>
+                            <p class="fw-bold">@Model?.EndTime.ToString("dd MMM yyyy, hh:mm tt")</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="text-muted small mb-1">Created Date</p>
+                            <p class="fw-bold">@Model?.CreatedAt.ToString("dd MMM yyyy")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics & Revenue Card -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Analytics & Revenue</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3 mb-md-0">
+                            <div class="p-3 bg-light rounded-2">
+                                <p class="text-muted small mb-2">Total Revenue</p>
+                                <h3 class="fw-bold text-success">৳@Model?.Revenue.ToString("N2")</h3>
+                                <small class="text-muted">@Model?.Price.ToString("N2") × @Model?.SoldCount</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3 mb-md-0">
+                            <div class="p-3 bg-light rounded-2">
+                                <p class="text-muted small mb-2">Tokens Sold</p>
+                                <h3 class="fw-bold text-info">@Model?.SoldCount</h3>
+                                <small class="text-muted">out of @(Model?.Capacity > 0 ? Model?.Capacity.ToString() : "∞")</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="p-3 bg-light rounded-2">
+                                <p class="text-muted small mb-2">Available Slots</p>
+                                <h3 class="fw-bold text-warning">
+                                    @if (Model?.Capacity > 0)
+                                    {
+                                        @Model?.RemainingCapacity
+                                    }
+                                    else
+                                    {
+                                        <span>∞</span>
+                                    }
+                                </h3>
+                                <small class="text-muted">remaining</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Information Card -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Status Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <p class="text-muted small mb-1">Current Status</p>
+                            <span class="badge @Model?.GetStatusBadgeClass() fs-6">@Model?.CurrentStatus</span>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">Archive Status</p>
+                            @if (Model != null && Model.IsArchived)
+                            {
+                                <span class="badge bg-dark fs-6">Archived</span>
+                                <small class="text-muted d-block mt-1">This meal has been manually archived.</small>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary fs-6">Active in System</span>
+                                <small class="text-muted d-block mt-1">This meal is part of the operational system.</small>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="d-flex gap-2 flex-wrap">
+                @if (Model != null && Model.CanEdit)
+                {
+                    <a href="@Url.Action("EditMeal", "Admin", new { id = Model.Id })"
+                       class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Edit Meal
+                    </a>
+                }
+                else if (Model != null && !Model.IsArchived && DateTime.Now < Model.StartTime)
+                {
+                    <a href="@Url.Action("EditMeal", "Admin", new { id = Model.Id })"
+                       class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Edit Meal
+                    </a>
+                }
+
+                @if (Model != null && DateTime.Now < Model.StartTime && Model.SoldCount == 0 && !Model.IsArchived)
+                {
+                    <form asp-controller="Admin"
+                          asp-action="ArchiveMeal"
+                          asp-route-id="@Model.Id"
+                          method="post"
+                          class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit"
+                                class="btn btn-outline-danger"
+                                onclick="return confirm('Archive this meal? It will be moved to meal history.');">
+                            <i class="bi bi-archive"></i> Archive Meal
+                        </button>
+                    </form>
+                }
+
+                <a href="@Url.Action("MealHistory", "Admin")"
+                   class="btn btn-outline-secondary">
+                    ← Back to Meal History
+                </a>
+                <a href="@Url.Action("Meals", "Admin")"
+                   class="btn btn-outline-secondary">
+                    ← Back to Operational Meals
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Read-Only Notice -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <strong><i class="bi bi-info-circle"></i> Read-Only View</strong>
+                <p class="mb-0 mt-2">This page displays meal information for inspection, history, and audit purposes. Direct editing is not allowed from this view. Use the Edit button above if the meal is still editable.</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .badge {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .gap-2 {
+        gap: 0.5rem;
+    }
+</style>

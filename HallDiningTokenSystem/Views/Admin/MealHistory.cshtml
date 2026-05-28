@@ -1,0 +1,227 @@
+@model List<MealSession>
+
+@{
+    ViewData["Title"] = "Meal History";
+    var currentFilter = ViewData["CurrentFilter"]?.ToString() ?? "All";
+}
+
+<div class="container-fluid py-5">
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="fw-bold">Meal History</h1>
+                <a href="@Url.Action("Meals", "Admin")" class="btn btn-outline-primary">← Back to Operational Meals</a>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="row mb-3">
+            <div class="col-lg-12">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="row mb-3">
+            <div class="col-lg-12">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (TempData["Warning"] != null)
+    {
+        <div class="row mb-3">
+            <div class="col-lg-12">
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    @TempData["Warning"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body text-center">
+                    <h6 class="text-muted small mb-2">Total Historical</h6>
+                    <h2 class="fw-bold text-primary">@(Model?.Count ?? 0)</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body text-center">
+                    <h6 class="text-muted small mb-2">Expired Meals</h6>
+                    <h2 class="fw-bold text-danger">@(Model?.Count(m => DateTime.Now > m.EndTime && !m.IsArchived) ?? 0)</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body text-center">
+                    <h6 class="text-muted small mb-2">Archived Meals</h6>
+                    <h2 class="fw-bold text-dark">@(Model?.Count(m => m.IsArchived) ?? 0)</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body text-center">
+                    <h6 class="text-muted small mb-2">Total Tokens Sold</h6>
+                    <h2 class="fw-bold text-info">@(Model?.Sum(m => m.Orders.Count) ?? 0)</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="btn-group" role="group">
+                <a href="@Url.Action("MealHistory", "Admin", new { filter = "All" })"
+                   class="btn @(currentFilter == "All" ? "btn-primary" : "btn-outline-primary")">
+                    All
+                </a>
+                <a href="@Url.Action("MealHistory", "Admin", new { filter = "Expired" })"
+                   class="btn @(currentFilter == "Expired" ? "btn-danger" : "btn-outline-danger")">
+                    Expired
+                </a>
+                <a href="@Url.Action("MealHistory", "Admin", new { filter = "Archived" })"
+                   class="btn @(currentFilter == "Archived" ? "btn-dark" : "btn-outline-dark")">
+                    Archived
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meals Table -->
+    @if (Model?.Count > 0)
+    {
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="table-responsive">
+                    <table class="table table-hover border rounded-3">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Meal Name</th>
+                                <th>Price</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Status</th>
+                                <th>Sold Count</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var meal in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@meal.Name</td>
+                                    <td>৳@meal.Price.ToString("N0")</td>
+                                    <td>@meal.StartTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                    <td>@meal.EndTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                    <td>
+                                        @{
+                                            string status;
+                                            string badgeClass;
+
+                                            if (meal.IsArchived)
+                                            {
+                                                status = "Archived";
+                                                badgeClass = "bg-dark";
+                                            }
+                                            else if (DateTime.Now < meal.StartTime)
+                                            {
+                                                status = "Upcoming";
+                                                badgeClass = "bg-secondary";
+                                            }
+                                            else if (DateTime.Now >= meal.StartTime && DateTime.Now <= meal.EndTime)
+                                            {
+                                                status = "Active";
+                                                badgeClass = "bg-success";
+                                            }
+                                            else
+                                            {
+                                                status = "Expired";
+                                                badgeClass = "bg-danger";
+                                            }
+                                        }
+                                        <span class="badge @badgeClass">@status</span>
+                                    </td>
+                                    <td class="text-center">@meal.Orders.Count</td>
+                                    <td class="text-muted small">@meal.CreatedAt.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-controller="Admin"
+                                               asp-action="MealDetails"
+                                               asp-route-id="@meal.Id"
+                                               class="btn btn-outline-info"
+                                               title="View meal details">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-archive text-muted" style="font-size: 2.5rem;"></i>
+                        <p class="text-muted mt-3">No @currentFilter.ToLower() meals found.</p>
+                        <a href="@Url.Action("Meals", "Admin")" class="btn btn-primary btn-sm mt-2">View Operational Meals</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-outline-secondary">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .btn-group {
+        gap: 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+</style>

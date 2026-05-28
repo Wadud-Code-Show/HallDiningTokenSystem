@@ -9,6 +9,7 @@ namespace HallDiningTokenSystem.Models
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public bool IsActive { get; set; }
+        public bool IsArchived { get; set; } = false; // Soft archive - meal is hidden but data preserved
         public DateTime CreatedAt { get; set; }
 
         // Navigation property
