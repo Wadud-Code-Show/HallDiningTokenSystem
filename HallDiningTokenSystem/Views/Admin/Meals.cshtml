@@ -63,14 +63,27 @@
                                     <td>@meal.StartTime.ToString("dd MMM yyyy, hh:mm tt")</td>
                                     <td>@meal.EndTime.ToString("dd MMM yyyy, hh:mm tt")</td>
                                     <td>
-                                        @if (meal.IsActive)
-                                        {
-                                            <span class="badge bg-success">Active</span>
+                                        @{
+                                            string status;
+                                            string badgeClass;
+
+                                            if (DateTime.Now < meal.StartTime)
+                                            {
+                                                status = "Upcoming";
+                                                badgeClass = "bg-secondary";
+                                            }
+                                            else if (DateTime.Now >= meal.StartTime && DateTime.Now <= meal.EndTime)
+                                            {
+                                                status = "Active";
+                                                badgeClass = "bg-success";
+                                            }
+                                            else
+                                            {
+                                                status = "Expired";
+                                                badgeClass = "bg-danger";
+                                            }
                                         }
-                                        else
-                                        {
-                                            <span class="badge bg-danger">Inactive</span>
-                                        }
+                                        <span class="badge @badgeClass">@status</span>
                                     </td>
                                     <td class="text-muted small">@meal.CreatedAt.ToString("dd MMM yyyy")</td>
                                 </tr>
