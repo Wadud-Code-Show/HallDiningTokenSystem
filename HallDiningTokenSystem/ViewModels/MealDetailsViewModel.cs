@@ -13,14 +13,18 @@ namespace HallDiningTokenSystem.Models
         public int Capacity { get; set; }
         public int SoldCount { get; set; }
 
-        // Timeline
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public DateTime CreatedAt { get; set; }
+        // Token Purchase Phase
+        public DateTime TokenSellStartDateTime { get; set; }
+        public DateTime TokenSellEndDateTime { get; set; }
+
+        // Meal Serving Phase
+        public DateTime MealServingStartDateTime { get; set; }
+        public DateTime MealServingEndDateTime { get; set; }
 
         // Status
+        public DateTime CreatedAt { get; set; }
         public bool IsArchived { get; set; }
-        public string CurrentStatus { get; set; } = null!; // Upcoming, Active, Expired, Archived
+        public string CurrentStatus { get; set; } = null!; // Archived, Upcoming, Sale Open, Sale Closed, Serving, Completed
 
         // Computed Properties - Read Only
         public int RemainingCapacity => Capacity - SoldCount;
@@ -28,19 +32,39 @@ namespace HallDiningTokenSystem.Models
 
         /// <summary>
         /// Gets the dynamic status based on time and archive state.
+        /// Hall Dining has 6 meal statuses:
+        /// - Archived: meal was manually archived
+        /// - Upcoming: token sale hasn't started yet
+        /// - Sale Open: students can currently buy tokens
+        /// - Sale Closed: token sale ended, meal serving not started
+        /// - Serving: students can collect their meals
+        /// - Completed: meal lifecycle finished
         /// </summary>
-        public static string GetMealStatus(DateTime startTime, DateTime endTime, bool isArchived)
+        public static string GetMealStatus(
+            DateTime tokenSellStartDateTime,
+            DateTime tokenSellEndDateTime,
+            DateTime mealServingStartDateTime,
+            DateTime mealServingEndDateTime,
+            bool isArchived)
         {
             if (isArchived)
                 return "Archived";
 
-            if (DateTime.Now < startTime)
+            var now = DateTime.Now;
+
+            if (now < tokenSellStartDateTime)
                 return "Upcoming";
 
-            if (DateTime.Now >= startTime && DateTime.Now <= endTime)
-                return "Active";
+            if (now >= tokenSellStartDateTime && now <= tokenSellEndDateTime)
+                return "Sale Open";
 
-            return "Expired";
+            if (now > tokenSellEndDateTime && now < mealServingStartDateTime)
+                return "Sale Closed";
+
+            if (now >= mealServingStartDateTime && now <= mealServingEndDateTime)
+                return "Serving";
+
+            return "Completed";
         }
 
         /// <summary>
@@ -51,8 +75,10 @@ namespace HallDiningTokenSystem.Models
             return CurrentStatus switch
             {
                 "Upcoming" => "bg-secondary",
-                "Active" => "bg-success",
-                "Expired" => "bg-danger",
+                "Sale Open" => "bg-success",
+                "Sale Closed" => "bg-warning",
+                "Serving" => "bg-primary",
+                "Completed" => "bg-danger",
                 "Archived" => "bg-dark",
                 _ => "bg-secondary"
             };
@@ -60,8 +86,9 @@ namespace HallDiningTokenSystem.Models
 
         /// <summary>
         /// Determines if this meal can be edited.
-        /// Archived and expired meals are read-only.
+        /// Archived meals are never editable.
+        /// Non-archived meals can only be edited before serving starts.
         /// </summary>
-        public bool CanEdit => !IsArchived && DateTime.Now < EndTime;
+        public bool CanEdit => !IsArchived && DateTime.Now < MealServingStartDateTime;
     }
 }

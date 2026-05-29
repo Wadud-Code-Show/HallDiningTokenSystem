@@ -1,0 +1,254 @@
+@model StudentMealDetailsViewModel
+
+@{
+    ViewData["Title"] = "Meal Details - " + Model?.MealName;
+}
+
+<div class="container-fluid py-5">
+    <!-- Header Section with Status -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold">@Model?.MealName</h1>
+                    <span class="badge @Model?.StatusBadgeClass fs-6 mt-2">@Model?.CurrentStatus</span>
+                </div>
+                <a href="@Url.Action("Meals", "Student")" class="btn btn-outline-secondary">
+                    ← Back to Meals
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row mb-4">
+        <!-- Left Column: Basic Information -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Meal Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <p class="text-muted small mb-1">Meal Name</p>
+                            <p class="fw-bold">@Model?.MealName</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted small mb-1">Price</p>
+                            <p class="fw-bold text-primary fs-5">৳@Model?.Price.ToString("N2")</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <p class="text-muted small mb-1">Capacity</p>
+                            <p class="fw-bold">
+                                @if (Model?.Capacity > 0)
+                                {
+                                    @Model?.Capacity
+                                }
+                                else
+                                {
+                                    <span>Unlimited</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted small mb-1">Already Sold</p>
+                            <p class="fw-bold">@Model?.SoldCount tokens</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="text-muted small mb-1">Available Slots</p>
+                            <p class="fw-bold text-success">
+                                @if (Model?.Capacity > 0)
+                                {
+                                    <text>@(Model?.RemainingCapacity) / @(Model?.Capacity) available</text>
+                                }
+                                else
+                                {
+                                    <span>Unlimited slots available</span>
+                                }
+                            </p>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Timeline Information -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Timing Information</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="text-success fw-bold mb-3">Token Purchase Phase</h6>
+                    <div class="mb-3">
+                        <p class="text-muted small mb-1">Token Sale Starts</p>
+                        <p class="fw-bold">@Model?.TokenSellStartDateTime.ToString("dddd, dd MMMM yyyy")</p>
+                        <p class="fw-bold text-info">@Model?.TokenSellStartDateTime.ToString("hh:mm tt")</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="text-muted small mb-1">Token Sale Ends</p>
+                        <p class="fw-bold">@Model?.TokenSellEndDateTime.ToString("dddd, dd MMMM yyyy")</p>
+                        <p class="fw-bold text-info">@Model?.TokenSellEndDateTime.ToString("hh:mm tt")</p>
+                    </div>
+
+                    <hr />
+                    <h6 class="text-primary fw-bold mb-3">Meal Serving Phase</h6>
+                    <div class="mb-3">
+                        <p class="text-muted small mb-1">Meal Serving Starts</p>
+                        <p class="fw-bold">@Model?.MealServingStartDateTime.ToString("dddd, dd MMMM yyyy")</p>
+                        <p class="fw-bold text-info">@Model?.MealServingStartDateTime.ToString("hh:mm tt")</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="text-muted small mb-1">Meal Serving Ends</p>
+                        <p class="fw-bold">@Model?.MealServingEndDateTime.ToString("dddd, dd MMMM yyyy")</p>
+                        <p class="fw-bold text-info">@Model?.MealServingEndDateTime.ToString("hh:mm tt")</p>
+                    </div>
+
+                    <div>
+                        <p class="text-muted small mb-1">Current Status</p>
+                        <span class="badge @Model?.StatusBadgeClass fs-6">@Model?.CurrentStatus</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Purchase Section -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3 bg-gradient" style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="fw-bold mb-2">Ready to Purchase?</h5>
+                            <p class="text-muted mb-0">
+                                @if (Model != null && Model.IsPurchaseReady)
+                                {
+                                    <span>This meal is available for purchase. Click the button below to buy a token.</span>
+                                }
+                                else
+                                {
+                                    <span>This meal is no longer available for purchase.</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <button class="btn btn-primary btn-lg" disabled title="Token purchase will be available soon">
+                                <i class="bi bi-cart-plus"></i> Buy Token (Coming Soon)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meal Availability Status -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Availability Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="text-center p-3">
+                                <i class="bi bi-calendar-check text-success" style="font-size: 1.5rem;"></i>
+                                <p class="text-muted small mt-2 mb-1">Status</p>
+                                <p class="fw-bold mb-0">@Model?.CurrentStatus</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="text-center p-3">
+                                @if (Model?.Capacity > 0 && Model?.RemainingCapacity > 0)
+                                {
+                                    <i class="bi bi-check-circle text-success" style="font-size: 1.5rem;"></i>
+                                    <p class="text-muted small mt-2 mb-1">Slots Available</p>
+                                    <p class="fw-bold mb-0">@Model?.RemainingCapacity left</p>
+                                }
+                                else if (Model?.Capacity > 0 && Model?.RemainingCapacity == 0)
+                                {
+                                    <i class="bi bi-exclamation-circle text-danger" style="font-size: 1.5rem;"></i>
+                                    <p class="text-muted small mt-2 mb-1">Slots Available</p>
+                                    <p class="fw-bold mb-0">Sold Out</p>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-infinity text-info" style="font-size: 1.5rem;"></i>
+                                    <p class="text-muted small mt-2 mb-1">Capacity</p>
+                                    <p class="fw-bold mb-0">Unlimited</p>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3">
+                                <i class="bi bi-people text-primary" style="font-size: 1.5rem;"></i>
+                                <p class="text-muted small mt-2 mb-1">Tokens Sold</p>
+                                <p class="fw-bold mb-0">@Model?.SoldCount purchased</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Future Features Notice -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="alert alert-warning" role="alert">
+                <h5 class="alert-heading">
+                    <i class="bi bi-info-circle"></i> Coming Soon
+                </h5>
+                <p class="mb-0">
+                    Token purchase functionality is currently under development. In the next phase, you'll be able to:
+                </p>
+                <ul class="mb-0 mt-2">
+                    <li>Purchase meal tokens directly from this page</li>
+                    <li>View your active tokens</li>
+                    <li>Redeem tokens at meal time</li>
+                    <li>Track your token history</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="@Url.Action("Meals", "Student")" class="btn btn-outline-secondary">
+                    ← Back to Available Meals
+                </a>
+                <a href="@Url.Action("Dashboard", "Student")" class="btn btn-outline-secondary">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+    }
+</style>

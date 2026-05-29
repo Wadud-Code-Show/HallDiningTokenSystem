@@ -1,0 +1,192 @@
+@model List<StudentMealViewModel>
+
+@{
+    ViewData["Title"] = "Available Meals";
+}
+
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold">Available Meals</h1>
+                    <p class="text-muted">Browse and purchase meal tokens</p>
+                </div>
+                <a href="@Url.Action("Dashboard", "Student")" class="btn btn-outline-secondary">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meal Count Badge -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <span class="badge bg-primary fs-6">@Model?.Count available meals</span>
+        </div>
+    </div>
+
+    <!-- Meals Table/List -->
+    @if (Model?.Count > 0)
+    {
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="table-responsive">
+                    <table class="table table-hover border rounded-3">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Meal Name</th>
+                                <th>Price</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Status</th>
+                                <th>Remaining Capacity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var meal in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@meal.MealName</td>
+                                    <td>৳@meal.Price.ToString("N2")</td>
+                                    <td>@meal.TokenSellStartDateTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                    <td>@meal.TokenSellEndDateTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                    <td>
+                                        <span class="badge @meal.StatusBadgeClass">@meal.CurrentStatus</span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (meal.Capacity > 0)
+                                        {
+                                            <span class="@(meal.RemainingCapacity > 0 ? "text-success fw-bold" : "text-danger fw-bold")">
+                                                @meal.RemainingCapacity / @meal.Capacity
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Unlimited</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("MealDetails", "Student", new { id = meal.Id })"
+                                           class="btn btn-sm btn-outline-info"
+                                           title="View meal details">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid View Alternative (Card Layout) -->
+        <div class="row mt-5 d-none d-lg-flex">
+            <div class="col-lg-12 mb-3">
+                <h5 class="fw-bold">Or browse as cards:</h5>
+            </div>
+            @foreach (var meal in Model)
+            {
+                <div class="col-lg-4 mb-3">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title fw-bold mb-0">@meal.MealName</h5>
+                                <span class="badge @meal.StatusBadgeClass">@meal.CurrentStatus</span>
+                            </div>
+
+                            <p class="card-text text-muted small mb-3">
+                                @meal.TokenSellStartDateTime.ToString("dd MMM") - @meal.TokenSellEndDateTime.ToString("dd MMM")
+                            </p>
+
+                            <div class="mb-3">
+                                <p class="text-muted small mb-1">Price</p>
+                                <h4 class="fw-bold text-primary mb-0">৳@meal.Price.ToString("N2")</h4>
+                            </div>
+
+                            <div class="mb-3">
+                                <p class="text-muted small mb-1">Available Slots</p>
+                                @if (meal.Capacity > 0)
+                                {
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar @(meal.RemainingCapacity > 0 ? "bg-success" : "bg-danger")"
+                                             role="progressbar"
+                                             style="width: @((meal.RemainingCapacity * 100 / meal.Capacity).ToString())%"
+                                             aria-valuenow="@meal.RemainingCapacity"
+                                             aria-valuemin="0"
+                                             aria-valuemax="@meal.Capacity">
+                                            @meal.RemainingCapacity / @meal.Capacity
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Unlimited capacity</span>
+                                }
+                            </div>
+
+                            <a href="@Url.Action("MealDetails", "Student", new { id = meal.Id })"
+                               class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-calendar-x text-muted" style="font-size: 2.5rem;"></i>
+                        <p class="text-muted mt-3">No meals available at this time.</p>
+                        <p class="text-muted small">Check back later for upcoming meals.</p>
+                        <a href="@Url.Action("Dashboard", "Student")" class="btn btn-primary btn-sm mt-2">
+                            Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Info Section -->
+    <div class="row mt-5">
+        <div class="col-lg-12">
+            <div class="alert alert-info" role="alert">
+                <h5 class="alert-heading">
+                    <i class="bi bi-info-circle"></i> Purchase Information
+                </h5>
+                <p class="mb-0">
+                    Click on any meal to view full details and purchase a token. You can only purchase tokens for upcoming and active meals.
+                    Your wallet balance will be deducted immediately upon purchase.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .progress {
+        background-color: #e9ecef;
+    }
+</style>

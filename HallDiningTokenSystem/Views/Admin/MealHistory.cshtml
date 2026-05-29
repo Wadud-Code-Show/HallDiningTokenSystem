@@ -64,8 +64,8 @@
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card border-0 shadow-sm rounded-3">
                 <div class="card-body text-center">
-                    <h6 class="text-muted small mb-2">Expired Meals</h6>
-                    <h2 class="fw-bold text-danger">@(Model?.Count(m => DateTime.Now > m.EndTime && !m.IsArchived) ?? 0)</h2>
+                    <h6 class="text-muted small mb-2">Completed Meals</h6>
+                    <h2 class="fw-bold text-danger">@(Model?.Count(m => DateTime.Now > m.MealServingEndDateTime && !m.IsArchived) ?? 0)</h2>
                 </div>
             </div>
         </div>
@@ -132,37 +132,31 @@
                                 <tr>
                                     <td class="fw-bold">@meal.Name</td>
                                     <td>৳@meal.Price.ToString("N0")</td>
-                                    <td>@meal.StartTime.ToString("dd MMM yyyy, hh:mm tt")</td>
-                                    <td>@meal.EndTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                    <td>@meal.TokenSellStartDateTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                    <td>@meal.MealServingEndDateTime.ToString("dd MMM yyyy, hh:mm tt")</td>
                                     <td>
                                         @{
-                                            string status;
-                                            string badgeClass;
+                                            var status = MealDetailsViewModel.GetMealStatus(
+                                                meal.TokenSellStartDateTime,
+                                                meal.TokenSellEndDateTime,
+                                                meal.MealServingStartDateTime,
+                                                meal.MealServingEndDateTime,
+                                                meal.IsArchived);
 
-                                            if (meal.IsArchived)
+                                            string badgeClass = status switch
                                             {
-                                                status = "Archived";
-                                                badgeClass = "bg-dark";
-                                            }
-                                            else if (DateTime.Now < meal.StartTime)
-                                            {
-                                                status = "Upcoming";
-                                                badgeClass = "bg-secondary";
-                                            }
-                                            else if (DateTime.Now >= meal.StartTime && DateTime.Now <= meal.EndTime)
-                                            {
-                                                status = "Active";
-                                                badgeClass = "bg-success";
-                                            }
-                                            else
-                                            {
-                                                status = "Expired";
-                                                badgeClass = "bg-danger";
-                                            }
+                                                "Upcoming" => "bg-secondary",
+                                                "Sale Open" => "bg-success",
+                                                "Sale Closed" => "bg-warning",
+                                                "Serving" => "bg-primary",
+                                                "Completed" => "bg-danger",
+                                                "Archived" => "bg-dark",
+                                                _ => "bg-secondary"
+                                            };
                                         }
                                         <span class="badge @badgeClass">@status</span>
                                     </td>
-                                    <td class="text-center">@meal.Orders.Count</td>
+                                    <td class="text-center">@meal.SoldCount</td>
                                     <td class="text-muted small">@meal.CreatedAt.ToString("dd MMM yyyy")</td>
                                     <td>
                                         <div class="btn-group btn-group-sm" role="group">

@@ -60,7 +60,7 @@ namespace HallDiningTokenSystem.Models
     {
         public string MealName { get; set; } = string.Empty;
         public string MealType { get; set; } = string.Empty;
-        public DateTime MealDate { get; set; }
+        public DateTime TokenSellStartDateTime { get; set; }
         public decimal Price { get; set; }
         public int Capacity { get; set; }
         public int SoldCount { get; set; }

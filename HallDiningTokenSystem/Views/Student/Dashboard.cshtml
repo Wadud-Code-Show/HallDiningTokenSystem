@@ -1,0 +1,166 @@
+@model StudentDashboardViewModel
+
+@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold">Dashboard</h1>
+                    <p class="text-muted small">Welcome, @Model?.StudentName</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Summary Card -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3 bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="card-title mb-2" style="opacity: 0.9;">Wallet Balance</h5>
+                            <h2 class="fw-bold display-5 mb-0">৳@Model?.CurrentBalance.ToString("N2")</h2>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="p-4 bg-white bg-opacity-10 rounded-3">
+                                <i class="bi bi-wallet2" style="font-size: 2.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards Row -->
+    <div class="row mb-4">
+        <!-- Token Summary -->
+        <div class="col-md-6 col-lg-3 mb-3 mb-lg-0">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body text-center">
+                    <i class="bi bi-ticket-perforated text-info" style="font-size: 2rem;"></i>
+                    <h6 class="text-muted small mt-2 mb-1">Purchased Tokens</h6>
+                    <h3 class="fw-bold mb-0">@Model?.TotalPurchasedTokens</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Redeemed Tokens -->
+        <div class="col-md-6 col-lg-3 mb-3 mb-lg-0">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
+                    <h6 class="text-muted small mt-2 mb-1">Redeemed Tokens</h6>
+                    <h3 class="fw-bold mb-0">@Model?.TotalRedeemedTokens</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Tokens -->
+        <div class="col-md-6 col-lg-3 mb-3 mb-lg-0">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body text-center">
+                    <i class="bi bi-star text-warning" style="font-size: 2rem;"></i>
+                    <h6 class="text-muted small mt-2 mb-1">Active Tokens</h6>
+                    <h3 class="fw-bold mb-0">@Model?.ActiveTokens</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Meals -->
+        <div class="col-md-6 col-lg-3 mb-3 mb-lg-0">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-check text-primary" style="font-size: 2rem;"></i>
+                    <h6 class="text-muted small mt-2 mb-1">Available Meals</h6>
+                    <h3 class="fw-bold mb-0">@Model?.TotalAvailableMeals</h3>
+                    <small class="text-muted">
+                        @Model?.UpcomingMealsCount upcoming, @Model?.ActiveMealsCount active
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <h5 class="fw-bold mb-3">Quick Actions</h5>
+            <div class="d-grid gap-2 gap-md-3 d-md-flex flex-wrap">
+                <a href="@Url.Action("Meals", "Student")" class="btn btn-primary btn-lg flex-md-grow-1">
+                    <i class="bi bi-calendar-check"></i> View Available Meals
+                </a>
+                <button class="btn btn-outline-secondary btn-lg flex-md-grow-1" disabled title="Coming soon">
+                    <i class="bi bi-ticket-perforated"></i> My Tokens (Coming Soon)
+                </button>
+                <button class="btn btn-outline-secondary btn-lg flex-md-grow-1" disabled title="Coming soon">
+                    <i class="bi bi-clock-history"></i> Wallet History (Coming Soon)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="row">
+        <!-- Helpful Information -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">How It Works</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="fw-bold mb-2">
+                            <i class="bi bi-1-circle text-primary"></i> Browse Meals
+                        </h6>
+                        <p class="small text-muted mb-0">View available meals with pricing and timing information.</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="fw-bold mb-2">
+                            <i class="bi bi-2-circle text-primary"></i> Purchase Tokens
+                        </h6>
+                        <p class="small text-muted mb-0">Buy meal tokens directly from your wallet balance.</p>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-2">
+                            <i class="bi bi-3-circle text-primary"></i> Redeem & Enjoy
+                        </h6>
+                        <p class="small text-muted mb-0">Redeem your tokens when you're ready for the meal.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Information -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Your Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <p class="text-muted small mb-1">Student ID</p>
+                            <p class="fw-bold">@Model?.StudentId</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted small mb-1">Full Name</p>
+                            <p class="fw-bold">@Model?.StudentName</p>
+                        </div>
+                    </div>
+                    <div class="alert alert-info small mb-0">
+                        <i class="bi bi-info-circle"></i> All transactions are recorded and can be viewed in your wallet history.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

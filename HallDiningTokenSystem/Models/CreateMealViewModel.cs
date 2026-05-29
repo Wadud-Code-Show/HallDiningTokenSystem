@@ -12,8 +12,17 @@ namespace HallDiningTokenSystem.Models
         [StringLength(50, ErrorMessage = "Meal type cannot exceed 50 characters.")]
         public string MealType { get; set; } = null!;
 
-        [Required(ErrorMessage = "Meal date is required.")]
-        public DateTime MealDate { get; set; }
+        [Required(ErrorMessage = "Token sale start is required.")]
+        public DateTime TokenSellStartDateTime { get; set; }
+
+        [Required(ErrorMessage = "Token sale end is required.")]
+        public DateTime TokenSellEndDateTime { get; set; }
+
+        [Required(ErrorMessage = "Meal serving start is required.")]
+        public DateTime MealServingStartDateTime { get; set; }
+
+        [Required(ErrorMessage = "Meal serving end is required.")]
+        public DateTime MealServingEndDateTime { get; set; }
 
         [Required(ErrorMessage = "Price is required.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0.")]
@@ -22,9 +31,6 @@ namespace HallDiningTokenSystem.Models
         [Required(ErrorMessage = "Capacity is required.")]
         [Range(1, int.MaxValue, ErrorMessage = "Capacity must be greater than 0.")]
         public int Capacity { get; set; }
-
-        [Required(ErrorMessage = "Sale end time is required.")]
-        public DateTime SaleEndTime { get; set; }
 
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters.")]
         public string? Description { get; set; }

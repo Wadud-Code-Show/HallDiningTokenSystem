@@ -59,21 +59,21 @@ namespace HallDiningTokenSystem.Controllers
             }
         }
 
-        // Meals List - Operational meals (Upcoming + Active)
+        // Meals List - Operational meals (Upcoming + Sale Open + Sale Closed + Serving)
         public async Task<IActionResult> Meals()
         {
             var meals = await _context.MealSessions
-                .Where(m => !m.IsArchived && DateTime.Now <= m.EndTime)
-                .OrderBy(m => m.StartTime)
+                .Where(m => !m.IsArchived && DateTime.Now <= m.MealServingEndDateTime)
+                .OrderBy(m => m.TokenSellStartDateTime)
                 .ToListAsync();
             return View(meals);
         }
 
-        // Meal History - Historical meals (Expired + Archived) with filtering
+        // Meal History - Historical meals (Completed + Archived) with filtering
         public async Task<IActionResult> MealHistory(string? filter = "All")
         {
             // Validate filter parameter
-            var validFilters = new[] { "All", "Expired", "Archived" };
+            var validFilters = new[] { "All", "Completed", "Archived" };
             if (string.IsNullOrEmpty(filter) || !validFilters.Contains(filter))
             {
                 filter = "All";
@@ -82,10 +82,10 @@ namespace HallDiningTokenSystem.Controllers
             IQueryable<MealSession> query = _context.MealSessions;
 
             // Apply filter logic
-            if (filter == "Expired")
+            if (filter == "Completed")
             {
-                // Expired: meal has ended naturally, not archived
-                query = query.Where(m => DateTime.Now > m.EndTime && !m.IsArchived);
+                // Completed: meal serving has ended, not archived
+                query = query.Where(m => DateTime.Now > m.MealServingEndDateTime && !m.IsArchived);
             }
             else if (filter == "Archived")
             {
@@ -94,12 +94,12 @@ namespace HallDiningTokenSystem.Controllers
             }
             else // "All"
             {
-                // All historical meals: either expired or archived
-                query = query.Where(m => DateTime.Now > m.EndTime || m.IsArchived);
+                // All historical meals: either completed or archived
+                query = query.Where(m => DateTime.Now > m.MealServingEndDateTime || m.IsArchived);
             }
 
             var meals = await query
-                .OrderByDescending(m => m.StartTime)
+                .OrderByDescending(m => m.TokenSellStartDateTime)
                 .ToListAsync();
 
             // Pass filter to view via ViewData
@@ -122,10 +122,10 @@ namespace HallDiningTokenSystem.Controllers
                 return RedirectToAction(nameof(Meals));
             }
 
-            // Check if meal is expired
-            if (DateTime.Now > meal.EndTime)
+            // Check if meal serving has started
+            if (DateTime.Now > meal.MealServingStartDateTime)
             {
-                TempData["Error"] = "Expired meals cannot be edited.";
+                TempData["Error"] = "Meals cannot be edited after serving starts.";
                 return RedirectToAction(nameof(Meals));
             }
 
@@ -135,10 +135,13 @@ namespace HallDiningTokenSystem.Controllers
                 Id = meal.Id,
                 MealName = meal.Name,
                 Price = meal.Price,
-                StartTime = meal.StartTime,
-                EndTime = meal.EndTime,
-                Capacity = 0, // MealSession doesn't have Capacity field yet
-                SoldCount = meal.Orders.Count()
+                TokenSellStartDateTime = meal.TokenSellStartDateTime,
+                TokenSellEndDateTime = meal.TokenSellEndDateTime,
+                MealServingStartDateTime = meal.MealServingStartDateTime,
+                MealServingEndDateTime = meal.MealServingEndDateTime,
+                Capacity = meal.Capacity,
+                SoldCount = meal.SoldCount,
+                Description = meal.Description
             };
 
             return View(viewModel);
@@ -166,25 +169,31 @@ namespace HallDiningTokenSystem.Controllers
                 return RedirectToAction(nameof(Meals));
             }
 
-            // Check if meal is expired
-            if (DateTime.Now > meal.EndTime)
+            // Check if meal serving has started
+            if (DateTime.Now > meal.MealServingStartDateTime)
             {
-                TempData["Error"] = "Expired meals cannot be edited.";
+                TempData["Error"] = "Meals cannot be edited after serving starts.";
                 return RedirectToAction(nameof(Meals));
             }
 
             // Get sold count
-            var soldCount = meal.Orders.Count();
+            var soldCount = meal.SoldCount;
 
-            // Validate EndTime > StartTime
-            if (model.EndTime <= model.StartTime)
+            // Validate date sequence
+            if (model.TokenSellStartDateTime >= model.TokenSellEndDateTime)
             {
-                ModelState.AddModelError("EndTime", "End time must be after start time.");
-                TempData["Error"] = "Please fix the validation errors.";
-                return View(model);
+                ModelState.AddModelError("TokenSellEndDateTime", "Token sale end must be after token sale start.");
+            }
+            if (model.TokenSellEndDateTime >= model.MealServingStartDateTime)
+            {
+                ModelState.AddModelError("MealServingStartDateTime", "Meal serving start must be after token sale end.");
+            }
+            if (model.MealServingStartDateTime >= model.MealServingEndDateTime)
+            {
+                ModelState.AddModelError("MealServingEndDateTime", "Meal serving end must be after meal serving start.");
             }
 
-            // Business Rule: If tokens sold, prevent price and start time changes
+            // Business Rule: If tokens sold, prevent price and token sale start changes
             if (soldCount > 0)
             {
                 // Revert to original values if user tried to edit locked fields
@@ -192,9 +201,9 @@ namespace HallDiningTokenSystem.Controllers
                 {
                     ModelState.AddModelError("Price", "Price cannot be changed when tokens are already sold.");
                 }
-                if (model.StartTime != meal.StartTime)
+                if (model.TokenSellStartDateTime != meal.TokenSellStartDateTime)
                 {
-                    ModelState.AddModelError("StartTime", "Start time cannot be changed when tokens are already sold.");
+                    ModelState.AddModelError("TokenSellStartDateTime", "Token sale start cannot be changed when tokens are already sold.");
                 }
 
                 if (!ModelState.IsValid)
@@ -204,11 +213,21 @@ namespace HallDiningTokenSystem.Controllers
                 }
             }
 
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Please fix the validation errors.";
+                return View(model);
+            }
+
             // Update meal properties
             meal.Name = model.MealName;
             meal.Price = model.Price;
-            meal.StartTime = model.StartTime;
-            meal.EndTime = model.EndTime;
+            meal.TokenSellStartDateTime = model.TokenSellStartDateTime;
+            meal.TokenSellEndDateTime = model.TokenSellEndDateTime;
+            meal.MealServingStartDateTime = model.MealServingStartDateTime;
+            meal.MealServingEndDateTime = model.MealServingEndDateTime;
+            meal.Capacity = model.Capacity;
+            meal.Description = model.Description;
 
             // Save changes
             _context.MealSessions.Update(meal);
@@ -241,16 +260,22 @@ namespace HallDiningTokenSystem.Controllers
                 return RedirectToAction(nameof(Meals));
             }
 
-            // Check if meal is NOT Upcoming (business rule: only archive upcoming meals)
-            if (DateTime.Now >= meal.StartTime)
+            // Check if meal is Upcoming (business rule: only archive upcoming meals)
+            var status = MealDetailsViewModel.GetMealStatus(
+                meal.TokenSellStartDateTime,
+                meal.TokenSellEndDateTime,
+                meal.MealServingStartDateTime,
+                meal.MealServingEndDateTime,
+                meal.IsArchived);
+
+            if (status != "Upcoming")
             {
                 TempData["Error"] = "Only upcoming meals can be archived.";
                 return RedirectToAction(nameof(Meals));
             }
 
             // Check if any tokens have been sold (business rule: no sold tokens)
-            var soldCount = meal.Orders.Count;
-            if (soldCount > 0)
+            if (meal.SoldCount > 0)
             {
                 TempData["Error"] = "Meals with sold tokens cannot be archived.";
                 return RedirectToAction(nameof(Meals));
@@ -287,13 +312,20 @@ namespace HallDiningTokenSystem.Controllers
                 Id = meal.Id,
                 MealName = meal.Name,
                 Price = meal.Price,
-                Capacity = 0, // MealSession doesn't have Capacity field yet - set to 0
-                SoldCount = meal.Orders.Count,
-                StartTime = meal.StartTime,
-                EndTime = meal.EndTime,
+                Capacity = meal.Capacity,
+                SoldCount = meal.SoldCount,
+                TokenSellStartDateTime = meal.TokenSellStartDateTime,
+                TokenSellEndDateTime = meal.TokenSellEndDateTime,
+                MealServingStartDateTime = meal.MealServingStartDateTime,
+                MealServingEndDateTime = meal.MealServingEndDateTime,
                 CreatedAt = meal.CreatedAt,
                 IsArchived = meal.IsArchived,
-                CurrentStatus = MealDetailsViewModel.GetMealStatus(meal.StartTime, meal.EndTime, meal.IsArchived)
+                CurrentStatus = MealDetailsViewModel.GetMealStatus(
+                    meal.TokenSellStartDateTime,
+                    meal.TokenSellEndDateTime,
+                    meal.MealServingStartDateTime,
+                    meal.MealServingEndDateTime,
+                    meal.IsArchived)
             };
 
             return View(viewModel);
@@ -508,15 +540,15 @@ namespace HallDiningTokenSystem.Controllers
 
             // Meal summary
             report.MealSummary = await _context.MealSessions
-                .OrderByDescending(m => m.StartTime)
+                .OrderByDescending(m => m.TokenSellStartDateTime)
                 .Select(m => new MealSummaryViewModel
                 {
                     MealName = m.Name,
                     MealType = m.Description ?? "N/A",
-                    MealDate = m.StartTime,
+                    TokenSellStartDateTime = m.TokenSellStartDateTime,
                     Price = m.Price,
-                    Capacity = 0, // MealSession doesn't have Capacity field
-                    SoldCount = m.Orders.Count
+                    Capacity = m.Capacity,
+                    SoldCount = m.SoldCount
                 })
                 .ToListAsync();
 

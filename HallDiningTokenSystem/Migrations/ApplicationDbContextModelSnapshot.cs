@@ -225,20 +225,23 @@ namespace HallDiningTokenSystem.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("Capacity")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsArchived")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime>("MealServingEndDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("MealServingStartDateTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -247,7 +250,13 @@ namespace HallDiningTokenSystem.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<int>("SoldCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TokenSellEndDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("TokenSellStartDateTime")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");

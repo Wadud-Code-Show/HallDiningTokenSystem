@@ -92,41 +92,82 @@
                             }
                         </div>
 
-                        <!-- Start Time -->
-                        <div class="mb-4">
-                            @if (Model.SoldCount > 0)
-                            {
-                                <label asp-for="StartTime" class="form-label fw-bold">Start Time <span class="text-danger">*</span> <span class="badge bg-warning text-dark">Locked</span></label>
-                                <input asp-for="StartTime" type="datetime-local" class="form-control" disabled />
-                                <small class="text-muted d-block mt-2">
-                                    This field is locked because tokens were already sold.
-                                </small>
-                            }
-                            else
-                            {
-                                <label asp-for="StartTime" class="form-label fw-bold">Start Time <span class="text-danger">*</span></label>
-                                <input asp-for="StartTime" type="datetime-local" class="form-control" />
-                                <span asp-validation-for="StartTime" class="text-danger small d-block mt-1"></span>
-                            }
+                        <!-- Token Purchase Phase -->
+                        <div class="card border-start border-success border-3 bg-light mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold text-success mb-3">Token Purchase Phase</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        @if (Model.SoldCount > 0)
+                                        {
+                                            <div class="mb-3">
+                                                <label asp-for="TokenSellStartDateTime" class="form-label fw-bold">Token Sale Start <span class="text-danger">*</span> <span class="badge bg-warning text-dark">Locked</span></label>
+                                                <input asp-for="TokenSellStartDateTime" type="datetime-local" class="form-control" disabled />
+                                                <small class="text-muted d-block mt-2">Locked because tokens were already sold.</small>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="mb-3">
+                                                <label asp-for="TokenSellStartDateTime" class="form-label fw-bold">Token Sale Start <span class="text-danger">*</span></label>
+                                                <input asp-for="TokenSellStartDateTime" type="datetime-local" class="form-control" />
+                                                <span asp-validation-for="TokenSellStartDateTime" class="text-danger small d-block mt-1"></span>
+                                                <small class="text-muted d-block mt-2">When students can start buying tokens.</small>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="TokenSellEndDateTime" class="form-label fw-bold">Token Sale End <span class="text-danger">*</span></label>
+                                            <input asp-for="TokenSellEndDateTime" type="datetime-local" class="form-control" />
+                                            <span asp-validation-for="TokenSellEndDateTime" class="text-danger small d-block mt-1"></span>
+                                            <small class="text-muted d-block mt-2">When token purchasing closes.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- End Time -->
-                        <div class="mb-4">
-                            <label asp-for="EndTime" class="form-label fw-bold">End Time <span class="text-danger">*</span></label>
-                            <input asp-for="EndTime" type="datetime-local" class="form-control" />
-                            <span asp-validation-for="EndTime" class="text-danger small d-block mt-1"></span>
-                            <small class="text-muted d-block mt-2">
-                                Must be after the start time.
-                            </small>
+                        <!-- Meal Serving Phase -->
+                        <div class="card border-start border-primary border-3 bg-light mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold text-primary mb-3">Meal Serving Phase</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="MealServingStartDateTime" class="form-label fw-bold">Meal Serving Start <span class="text-danger">*</span></label>
+                                            <input asp-for="MealServingStartDateTime" type="datetime-local" class="form-control" />
+                                            <span asp-validation-for="MealServingStartDateTime" class="text-danger small d-block mt-1"></span>
+                                            <small class="text-muted d-block mt-2">When meal collection starts.</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="MealServingEndDateTime" class="form-label fw-bold">Meal Serving End <span class="text-danger">*</span></label>
+                                            <input asp-for="MealServingEndDateTime" type="datetime-local" class="form-control" />
+                                            <span asp-validation-for="MealServingEndDateTime" class="text-danger small d-block mt-1"></span>
+                                            <small class="text-muted d-block mt-2">When meal collection closes.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Capacity (Read-only) -->
+                        <!-- Capacity -->
                         <div class="mb-4">
                             <label asp-for="Capacity" class="form-label fw-bold">Capacity <span class="text-danger">*</span></label>
-                            <input asp-for="Capacity" type="number" class="form-control" disabled />
+                            <input asp-for="Capacity" type="number" class="form-control" />
+                            <span asp-validation-for="Capacity" class="text-danger small d-block mt-1"></span>
                             <small class="text-muted d-block mt-2">
-                                Capacity is currently not editable.
+                                Total number of meals available for purchase.
                             </small>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-bold">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="2" placeholder="Optional meal description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger small d-block mt-1"></span>
                         </div>
 
                         <!-- Sold Count (Display only) -->

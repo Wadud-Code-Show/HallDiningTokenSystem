@@ -23,16 +23,26 @@ namespace HallDiningTokenSystem.Services
         {
             try
             {
-                // Validate that SaleEndTime is in the future
-                if (model.SaleEndTime <= DateTime.Now)
+                // Validate date sequence
+                if (model.TokenSellStartDateTime >= model.TokenSellEndDateTime)
                 {
-                    return ServiceResult.ErrorResult("Sale end time must be in the future.");
+                    return ServiceResult.ErrorResult("Token sale end must be after token sale start.");
                 }
 
-                // Validate that MealDate is today or in the future
-                if (model.MealDate.Date < DateTime.Now.Date)
+                if (model.TokenSellEndDateTime >= model.MealServingStartDateTime)
                 {
-                    return ServiceResult.ErrorResult("Meal date cannot be in the past.");
+                    return ServiceResult.ErrorResult("Meal serving start must be after token sale end.");
+                }
+
+                if (model.MealServingStartDateTime >= model.MealServingEndDateTime)
+                {
+                    return ServiceResult.ErrorResult("Meal serving end must be after meal serving start.");
+                }
+
+                // Validate that TokenSellStartDateTime is not in the past
+                if (model.TokenSellStartDateTime < DateTime.Now)
+                {
+                    return ServiceResult.ErrorResult("Token sale start cannot be in the past.");
                 }
 
                 var mealSession = new MealSession
@@ -40,9 +50,11 @@ namespace HallDiningTokenSystem.Services
                     Name = model.MealName,
                     Description = model.Description,
                     Price = model.Price,
-                    StartTime = model.MealDate,
-                    EndTime = model.MealDate.AddHours(3), // Default 3-hour window
-                    IsActive = true,
+                    Capacity = model.Capacity,
+                    TokenSellStartDateTime = model.TokenSellStartDateTime,
+                    TokenSellEndDateTime = model.TokenSellEndDateTime,
+                    MealServingStartDateTime = model.MealServingStartDateTime,
+                    MealServingEndDateTime = model.MealServingEndDateTime,
                     CreatedAt = DateTime.Now
                 };
 

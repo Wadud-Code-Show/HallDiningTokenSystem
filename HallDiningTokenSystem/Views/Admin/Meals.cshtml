@@ -76,37 +76,36 @@
                                 <tr>
                                     <td class="fw-bold">@meal.Name</td>
                                     <td>৳@meal.Price.ToString("N0")</td>
-                                    <td>@meal.StartTime.ToString("dd MMM yyyy, hh:mm tt")</td>
-                                    <td>@meal.EndTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                    <td>@meal.TokenSellStartDateTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                    <td>@meal.MealServingEndDateTime.ToString("dd MMM yyyy, hh:mm tt")</td>
                                     <td>
                                         @{
-                                            string status;
-                                            string badgeClass;
+                                            var status = MealDetailsViewModel.GetMealStatus(
+                                                meal.TokenSellStartDateTime,
+                                                meal.TokenSellEndDateTime,
+                                                meal.MealServingStartDateTime,
+                                                meal.MealServingEndDateTime,
+                                                meal.IsArchived);
 
-                                            if (DateTime.Now < meal.StartTime)
+                                            string badgeClass = status switch
                                             {
-                                                status = "Upcoming";
-                                                badgeClass = "bg-secondary";
-                                            }
-                                            else if (DateTime.Now >= meal.StartTime && DateTime.Now <= meal.EndTime)
-                                            {
-                                                status = "Active";
-                                                badgeClass = "bg-success";
-                                            }
-                                            else
-                                            {
-                                                status = "Expired";
-                                                badgeClass = "bg-danger";
-                                            }
+                                                "Upcoming" => "bg-secondary",
+                                                "Sale Open" => "bg-success",
+                                                "Sale Closed" => "bg-warning",
+                                                "Serving" => "bg-primary",
+                                                "Completed" => "bg-danger",
+                                                "Archived" => "bg-dark",
+                                                _ => "bg-secondary"
+                                            };
                                         }
                                         <span class="badge @badgeClass">@status</span>
                                     </td>
                                     <td class="text-muted small">@meal.CreatedAt.ToString("dd MMM yyyy")</td>
                                     <td>
                                         @{
-                                            bool isExpired = DateTime.Now > meal.EndTime;
-                                            bool isUpcoming = DateTime.Now < meal.StartTime;
-                                            var soldCount = meal.Orders.Count;
+                                            bool isExpired = DateTime.Now > meal.MealServingEndDateTime;
+                                            bool isUpcoming = DateTime.Now < meal.TokenSellStartDateTime;
+                                            var soldCount = meal.SoldCount;
                                         }
                                         @if (isExpired)
                                         {
