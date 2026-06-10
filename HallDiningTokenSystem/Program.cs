@@ -18,6 +18,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 builder.Services.AddScoped<DbSeeder>();
 builder.Services.AddScoped<IMealService, MealService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddScoped<ISettlementService, SettlementService>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -44,6 +45,7 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

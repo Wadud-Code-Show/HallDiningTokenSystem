@@ -1,0 +1,144 @@
+@model RedemptionReportViewModel
+
+@{
+    ViewData["Title"] = "Redemption Report";
+}
+
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold">Redemption Report</h1>
+                    <p class="text-muted mb-0">Token redemption log with detailed tracking</p>
+                </div>
+                <a href="@Url.Action("Dashboard", "Reports")" class="btn btn-outline-secondary">← Back</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" asp-action="Redemptions" class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" name="startDate" class="form-control" value="@Model?.StartDate.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">End Date</label>
+                            <input type="date" name="endDate" class="form-control" value="@Model?.EndDate.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Meal</label>
+                            <select name="mealId" class="form-select">
+                                <option value="">All Meals</option>
+                                @if (Model?.AvailableMeals != null)
+                                {
+                                    @foreach (var meal in Model.AvailableMeals)
+                                    {
+                                        <option value="@meal.Id" selected="@(Model.SelectedMealId == meal.Id)">@meal.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">DeliveryMan</label>
+                            <select name="deliveryManId" class="form-select">
+                                <option value="">All DeliveryMen</option>
+                                @if (Model?.AvailableDeliveryMen != null)
+                                {
+                                    @foreach (var deliveryMan in Model.AvailableDeliveryMen)
+                                    {
+                                        <option value="@deliveryMan.Id" selected="@(Model.SelectedDeliveryManId == deliveryMan.Id)">
+                                            @(deliveryMan.FullName ?? deliveryMan.UserName)
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                            <a href="@Url.Action("Redemptions", "Reports")" class="btn btn-outline-secondary">Clear Filters</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="row mb-4">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Total Redemptions</p>
+                    <h3 class="fw-bold">@Model?.TotalRedemptions</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Date Range</p>
+                    <p class="fw-bold mb-0">@Model?.StartDate.ToString("dd/MM/yyyy") - @Model?.EndDate.ToString("dd/MM/yyyy")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Redemptions Table -->
+    <div class="row">
+        <div class="col-lg-12">
+            @if (Model?.Redemptions == null || Model.Redemptions.Count == 0)
+            {
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body p-5 text-center">
+                        <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                        <h5 class="mt-3 text-muted">No Redemptions Found</h5>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="fw-bold">Meal Name</th>
+                                    <th class="fw-bold">Student Name</th>
+                                    <th class="fw-bold">Student ID</th>
+                                    <th class="fw-bold">OTP Code</th>
+                                    <th class="fw-bold">Redeemed By</th>
+                                    <th class="fw-bold">Redeemed At</th>
+                                    <th class="fw-bold">Time Ago</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var redemption in Model.Redemptions)
+                                {
+                                    <tr>
+                                        <td>@redemption.MealName</td>
+                                        <td>@redemption.StudentName</td>
+                                        <td>@redemption.StudentId</td>
+                                        <td><code>@redemption.OtpCode</code></td>
+                                        <td>@redemption.RedeemedBy</td>
+                                        <td>@redemption.RedeemedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                        <td><small class="text-muted">@redemption.TimeAgo</small></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

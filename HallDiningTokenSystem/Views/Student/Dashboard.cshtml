@@ -81,7 +81,7 @@
                     <h6 class="text-muted small mt-2 mb-1">Available Meals</h6>
                     <h3 class="fw-bold mb-0">@Model?.TotalAvailableMeals</h3>
                     <small class="text-muted">
-                        @Model?.UpcomingMealsCount upcoming, @Model?.ActiveMealsCount active
+                        @Model?.UpcomingMealsCount upcoming, @Model?.ActiveMealsCount sale-open
                     </small>
                 </div>
             </div>
@@ -96,12 +96,12 @@
                 <a href="@Url.Action("Meals", "Student")" class="btn btn-primary btn-lg flex-md-grow-1">
                     <i class="bi bi-calendar-check"></i> View Available Meals
                 </a>
-                <button class="btn btn-outline-secondary btn-lg flex-md-grow-1" disabled title="Coming soon">
-                    <i class="bi bi-ticket-perforated"></i> My Tokens (Coming Soon)
-                </button>
-                <button class="btn btn-outline-secondary btn-lg flex-md-grow-1" disabled title="Coming soon">
-                    <i class="bi bi-clock-history"></i> Wallet History (Coming Soon)
-                </button>
+                <a href="@Url.Action("MyTokens", "Student")" class="btn btn-outline-primary btn-lg flex-md-grow-1">
+                    <i class="bi bi-ticket-perforated"></i> My Tokens
+                </a>
+                <a href="@Url.Action("WalletHistory", "Student")" class="btn btn-outline-primary btn-lg flex-md-grow-1">
+                    <i class="bi bi-clock-history"></i> Wallet History
+                </a>
             </div>
         </div>
     </div>

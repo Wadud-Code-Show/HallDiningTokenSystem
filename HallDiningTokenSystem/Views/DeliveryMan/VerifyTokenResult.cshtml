@@ -1,0 +1,156 @@
+@model TokenVerificationResultViewModel
+
+@{
+    ViewData["Title"] = (Model?.IsSuccess ?? false) ? "Token Redeemed" : "Verification Failed";
+}
+
+<div class="container-fluid py-5">
+    <!-- Result Container -->
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <!-- Result Card -->
+            <div class="card border-0 shadow-lg rounded-3 mb-4">
+                <!-- Result Header -->
+                <div class="card-header @Model?.ResultBadgeClass text-white border-bottom-0 p-4 text-center">
+                    <i class="bi @Model?.ResultIcon" style="font-size: 3rem;"></i>
+                    <h3 class="fw-bold mt-3 mb-0">@Model?.ResultMessage</h3>
+                </div>
+
+                <!-- Result Body -->
+                <div class="card-body p-5">
+                    @if (Model?.IsSuccess ?? false)
+                    {
+                        <!-- Success Details -->
+                        <div class="alert alert-success p-3 mb-4">
+                            Token has been successfully redeemed and recorded.
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <p class="text-muted small mb-1">Meal Name</p>
+                                <p class="fw-bold fs-5">@Model?.MealName</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="text-muted small mb-1">OTP Code</p>
+                                <p class="fw-bold fs-5 font-monospace">@Model?.OtpCode</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <p class="text-muted small mb-1">Student Name</p>
+                                <p class="fw-bold">@Model?.StudentName</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="text-muted small mb-1">Student ID</p>
+                                <p class="fw-bold">@Model?.StudentId</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <p class="text-muted small mb-1">Redeemed At</p>
+                            <p class="fw-bold">@Model?.RedeemedAt.ToString("dddd, dd MMMM yyyy - hh:mm:ss tt")</p>
+                        </div>
+
+                        <hr />
+
+                        <!-- Success Actions -->
+                        <div class="d-grid gap-2 mt-4">
+                            <a href="@Url.Action("VerifyToken", "DeliveryMan")" class="btn btn-primary btn-lg">
+                                <i class="bi bi-plus-lg"></i> Verify Next Token
+                            </a>
+                            <a href="@Url.Action("Dashboard", "DeliveryMan")" class="btn btn-outline-secondary">
+                                <i class="bi bi-house"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Error Details -->
+                        <div class="alert alert-danger p-3 mb-4">
+                            <i class="bi bi-exclamation-circle"></i>
+                            <strong>Verification Failed</strong>
+                        </div>
+
+                        <div class="mb-4">
+                            <p class="text-muted small mb-1">OTP Code Entered</p>
+                            <p class="fw-bold font-monospace">@Model?.OtpEntered</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <p class="text-muted small mb-1">Error Message</p>
+                            <p class="fw-bold text-danger">@Model?.ErrorMessage</p>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model?.TokenStatus))
+                        {
+                            <div class="mb-4">
+                                <p class="text-muted small mb-1">Token Status</p>
+                                <p class="fw-bold">
+                                    @switch (Model?.TokenStatus)
+                                    {
+                                        case "Redeemed":
+                                            <span class="badge bg-primary">Already Redeemed</span>
+                                            break;
+                                        case "Expired":
+                                            <span class="badge bg-danger">Expired</span>
+                                            break;
+                                        case "Cancelled":
+                                            <span class="badge bg-secondary">Cancelled</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-warning">@Model?.TokenStatus</span>
+                                            break;
+                                    }
+                                </p>
+                            </div>
+                        }
+
+                        <hr />
+
+                        <!-- Troubleshooting Tips -->
+                        <div class="alert alert-info p-3 mb-4">
+                            <strong>Troubleshooting:</strong>
+                            <ul class="mb-0 mt-2 small">
+                                <li>Check if OTP code is entered correctly (case-insensitive)</li>
+                                <li>Verify serving window is active</li>
+                                <li>Ensure meal hasn't been archived</li>
+                                <li>Contact manager if token is already redeemed</li>
+                            </ul>
+                        </div>
+
+                        <!-- Error Actions -->
+                        <div class="d-grid gap-2 mt-4">
+                            <a href="@Url.Action("VerifyToken", "DeliveryMan")" class="btn btn-primary btn-lg">
+                                <i class="bi bi-arrow-counterclockwise"></i> Try Again
+                            </a>
+                            <a href="@Url.Action("Dashboard", "DeliveryMan")" class="btn btn-outline-secondary">
+                                <i class="bi bi-house"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="text-center">
+                <a href="@Url.Action("ServingHistory", "DeliveryMan")" class="link-secondary small">
+                    View Serving History
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .font-monospace {
+        font-family: 'Courier New', monospace;
+        letter-spacing: 2px;
+    }
+
+    .alert-info {
+        background-color: #e7f3ff;
+        border: 1px solid #cce5ff;
+        color: #004085;
+    }
+</style>

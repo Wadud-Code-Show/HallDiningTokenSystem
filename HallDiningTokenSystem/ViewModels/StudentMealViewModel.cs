@@ -15,6 +15,7 @@ namespace HallDiningTokenSystem.Models
         public DateTime MealServingEndDateTime { get; set; }
         public int Capacity { get; set; }
         public int SoldCount { get; set; }
+        public bool IsArchived { get; set; }
 
         // Computed Properties
         public int RemainingCapacity => Capacity > 0 ? Capacity - SoldCount : 0;
@@ -24,11 +25,14 @@ namespace HallDiningTokenSystem.Models
 
         /// <summary>
         /// Calculates current status based on time.
-        /// Students only see Upcoming and Sale Open meals.
+        /// Covers all lifecycle stages: Upcoming, Sale Open, Sale Closed, Serving, Expired, Archived.
         /// </summary>
         private string GetStatus()
         {
             var now = DateTime.Now;
+
+            if (IsArchived)
+                return "Archived";
 
             if (now < TokenSellStartDateTime)
                 return "Upcoming";
@@ -36,7 +40,16 @@ namespace HallDiningTokenSystem.Models
             if (now >= TokenSellStartDateTime && now <= TokenSellEndDateTime)
                 return "Sale Open";
 
-            // Should never reach here as non-operational meals are filtered server-side
+            // If sale ended but serving hasn't started
+            if (now > TokenSellEndDateTime && now < MealServingStartDateTime)
+                return "Sale Closed";
+
+            if (now >= MealServingStartDateTime && now <= MealServingEndDateTime)
+                return "Serving";
+
+            if (now > MealServingEndDateTime)
+                return "Expired";
+
             return "Unknown";
         }
 
@@ -47,8 +60,12 @@ namespace HallDiningTokenSystem.Models
         {
             return CurrentStatus switch
             {
-                "Upcoming" => "bg-secondary",
+                "Archived" => "bg-secondary",
+                "Upcoming" => "bg-info",
                 "Sale Open" => "bg-success",
+                "Sale Closed" => "bg-warning",
+                "Serving" => "bg-primary",
+                "Expired" => "bg-dark",
                 _ => "bg-secondary"
             };
         }

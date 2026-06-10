@@ -288,6 +288,9 @@ namespace HallDiningTokenSystem.Migrations
                     b.Property<DateTime?>("RedeemedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("RedeemedById")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -295,6 +298,8 @@ namespace HallDiningTokenSystem.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("RedeemedById");
 
                     b.ToTable("MealTokens");
                 });
@@ -618,7 +623,14 @@ namespace HallDiningTokenSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("HallDiningTokenSystem.Models.ApplicationUser", "RedeemedBy")
+                        .WithMany()
+                        .HasForeignKey("RedeemedById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Order");
+
+                    b.Navigation("RedeemedBy");
                 });
 
             modelBuilder.Entity("HallDiningTokenSystem.Models.Order", b =>

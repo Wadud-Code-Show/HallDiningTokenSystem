@@ -1,0 +1,255 @@
+@model SettlementConsistencyDashboardViewModel
+
+@{
+    ViewData["Title"] = "Financial Consistency Dashboard";
+}
+
+<div class="container-fluid py-5">
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold mb-2">Financial Consistency Dashboard</h1>
+                    <p class="text-muted">System-wide cash flow verification and financial integrity audit.</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Dashboard", "AdminSettlement")" class="btn btn-outline-secondary">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Consistency Summary -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Global Financial Status</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <p class="text-muted small">Total Collected</p>
+                                <h3 class="fw-bold">৳@Model.SystemTotalCollected.ToString("N2")</h3>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <p class="text-muted small">Already Settled</p>
+                                <h3 class="fw-bold text-success">৳@Model.SystemTotalSettled.ToString("N2")</h3>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <p class="text-muted small">Pending Settlement</p>
+                                <h3 class="fw-bold text-warning">৳@Model.SystemTotalPending.ToString("N2")</h3>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <p class="text-muted small">Balance Status</p>
+                                @if (Model.IsBalanced)
+                                {
+                                    <h3 class="fw-bold text-success"><i class="bi bi-check-circle"></i> Balanced</h3>
+                                }
+                                else
+                                {
+                                    <h3 class="fw-bold text-danger"><i class="bi bi-exclamation-circle"></i> Imbalanced</h3>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Consistency Check -->
+                    <hr class="my-4" />
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <p class="mb-0 fw-bold">System Consistency Check:</p>
+                                @if (Model.IsBalanced)
+                                {
+                                    <span class="badge bg-success">✓ CONSISTENT</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">✗ INCONSISTENT</span>
+                                }
+                            </div>
+                            <p class="text-muted small">
+                                Total Collected = Settled + Pending
+                            </p>
+                            <p class="text-muted small">
+                                ৳@Model.SystemTotalCollected.ToString("N2") = ৳@Model.SystemTotalSettled.ToString("N2") + ৳@Model.SystemTotalPending.ToString("N2")
+                            </p>
+
+                            @if (!Model.IsBalanced)
+                            {
+                                <div class="alert alert-danger mt-3" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <strong>Critical:</strong> Cash flow is inconsistent. Please investigate.
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Per-CashAdmin Consistency -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Per-CashAdmin Breakdown (@Model.CashAdminCount admins)</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.CashAdminSummaries.Count == 0)
+                    {
+                        <div class="p-5 text-center text-muted">
+                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                            <p class="mt-3">No CashAdmins with collections.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>CashAdmin</th>
+                                        <th>Collected</th>
+                                        <th>Settled</th>
+                                        <th>Pending</th>
+                                        <th>Consistency</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var admin in Model.CashAdminSummaries.OrderByDescending(a => a.TotalCollected))
+                                    {
+                                        <tr>
+                                            <td class="fw-bold">@admin.CashAdminName</td>
+                                            <td>৳@admin.TotalCollected.ToString("N2")</td>
+                                            <td>
+                                                <span class="badge bg-success-subtle text-success-emphasis">৳@admin.TotalSettled.ToString("N2")</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-warning-subtle text-warning-emphasis">৳@admin.PendingSettlement.ToString("N2")</span>
+                                            </td>
+                                            <td>
+                                                @if (admin.IsConsistent)
+                                                {
+                                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> OK</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger"><i class="bi bi-exclamation-circle"></i> ERROR</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailsModal_@admin.CashAdminId">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Details Modal -->
+                                        <div class="modal fade" id="detailsModal_@admin.CashAdminId" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">@admin.CashAdminName - Details</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="row mb-3">
+                                                            <div class="col-6">
+                                                                <label class="form-label text-muted small">Total Collected</label>
+                                                                <p class="fw-bold">৳@admin.TotalCollected.ToString("N2")</p>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <label class="form-label text-muted small">Total Settled</label>
+                                                                <p class="fw-bold">৳@admin.TotalSettled.ToString("N2")</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row mb-3">
+                                                            <div class="col-6">
+                                                                <label class="form-label text-muted small">Pending Settlement</label>
+                                                                <p class="fw-bold">৳@admin.PendingSettlement.ToString("N2")</p>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <label class="form-label text-muted small">Collection Count</label>
+                                                                <p class="fw-bold">@admin.CollectionCount</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <hr />
+
+                                                        <div class="mb-3">
+                                                            <label class="form-label text-muted small">Consistency Check</label>
+                                                            @if (admin.IsConsistent)
+                                                            {
+                                                                <p class="text-success"><i class="bi bi-check-circle"></i> Consistent</p>
+                                                            }
+                                                            else
+                                                            {
+                                                                <p class="text-danger"><i class="bi bi-exclamation-circle"></i> Inconsistent</p>
+                                                            }
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label class="form-label text-muted small">Equation</label>
+                                                            <p class="text-muted small">
+                                                                ৳@admin.TotalCollected.ToString("N2") = 
+                                                                ৳@admin.TotalSettled.ToString("N2") + 
+                                                                ৳@admin.PendingSettlement.ToString("N2")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle"></i>
+                <strong>Financial Guarantee:</strong>
+                <ul class="mb-0 mt-2">
+                    <li><strong>Total Collected:</strong> Sum of all cash top-ups by this CashAdmin</li>
+                    <li><strong>Settled:</strong> Amounts already approved and recorded as settlement</li>
+                    <li><strong>Pending:</strong> Amounts in pending settlement requests (not yet approved)</li>
+                    <li><strong>Invariant:</strong> Collected = Settled + Pending (always)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

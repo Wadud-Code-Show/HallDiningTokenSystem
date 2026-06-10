@@ -51,11 +51,29 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="MealHistory">Meal History</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="SettlementRequests">Settlement Requests</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-dark dropdown-toggle" href="#" id="settlementsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Settlements
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="settlementsDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="AdminSettlement" asp-action="PendingRequests">Pending Requests</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="AdminSettlement" asp-action="SettlementHistory">Settlement History</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="AdminSettlement" asp-action="ConsistencyDashboard">Consistency Dashboard</a></li>
+                                </ul>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Reports">Reports</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-dark dropdown-toggle" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Reports
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Reports" asp-action="Dashboard">Dashboard</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Reports" asp-action="Meals">Meals Report</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Reports" asp-action="Students">Students Report</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Reports" asp-action="Redemptions">Redemptions Report</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Reports" asp-action="Wallets">Wallets Report</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Reports" asp-action="Settlements">Settlements Report</a></li>
+                                </ul>
                             </li>
                         }
                         @if (User.IsInRole("CashAdmin"))
@@ -76,10 +94,28 @@
                         @if (User.IsInRole("Student"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="Dashboard">Student Dashboard</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="Dashboard">Dashboard</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="Meals">Available Meals</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="MyTokens">My Tokens</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="WalletHistory">Wallet History</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("DeliveryMan"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="DeliveryMan" asp-action="Dashboard">Serving Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="DeliveryMan" asp-action="VerifyToken">Verify Token</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="DeliveryMan" asp-action="ServingHistory">Serving History</a>
                             </li>
                         }
                     </ul>

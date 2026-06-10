@@ -1,6 +1,7 @@
 using HallDiningTokenSystem.Data;
 using HallDiningTokenSystem.Models;
 using HallDiningTokenSystem.Services;
+using HallDiningTokenSystem.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +13,18 @@ namespace HallDiningTokenSystem.Controllers
     public class CashAdminController : Controller
     {
         private readonly IWalletService _walletService;
+        private readonly ISettlementService _settlementService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
 
-        public CashAdminController(IWalletService walletService, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        public CashAdminController(
+            IWalletService walletService,
+            ISettlementService settlementService,
+            UserManager<ApplicationUser> userManager,
+            ApplicationDbContext context)
         {
             _walletService = walletService;
+            _settlementService = settlementService;
             _userManager = userManager;
             _context = context;
         }
@@ -32,31 +39,27 @@ namespace HallDiningTokenSystem.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            // Get all cash collections for current CashAdmin
+            // Use SettlementService for consistent calculations
+            var totalCollected = await _settlementService.GetTotalCollectedAsync(currentUser.Id);
+            var totalSettled = await _settlementService.GetTotalSettledAsync(currentUser.Id);
+            var pendingSettlement = await _settlementService.GetPendingSettlementAsync(currentUser.Id);
+            var collectionCount = await _settlementService.GetCollectionCountAsync(currentUser.Id);
+
+            // Get pending settlement requests
+            var pendingRequests = await _settlementService.GetSettlementRequestsAsync(currentUser.Id, "Pending");
+            var pendingRequestCount = pendingRequests.Count;
+            var pendingRequestedAmount = pendingRequests.Sum(csr => csr.Amount);
+
+            // Get recent top-ups
             var collections = await _context.CashCollections
                 .Where(cc => cc.CashAdminId == currentUser.Id)
                 .Include(cc => cc.Student)
-                .ToListAsync();
-
-            // Calculate metrics
-            var totalCollected = collections.Sum(cc => cc.Amount);
-            var todayCollected = collections
-                .Where(cc => cc.CreatedAt.Date == DateTime.Now.Date)
-                .Sum(cc => cc.Amount);
-            var totalTopUps = collections.Count;
-
-            // Calculate TotalSettled from CashSettlements where CashAdminId == current user
-            var totalSettled = await _context.CashSettlements
-                .Where(cs => cs.CashAdminId == currentUser.Id)
-                .SumAsync(cs => cs.Amount);
-
-            var pendingCash = totalCollected - totalSettled;
-
-            // Get recent top-ups (last 5)
-            var recentTopUps = collections
                 .OrderByDescending(cc => cc.CreatedAt)
                 .Take(5)
-                .Select(cc => new RecentTopUpViewModel
+                .ToListAsync();
+
+            var recentTopUps = collections
+                .Select(cc => new ViewModels.RecentTopUpViewModel
                 {
                     Id = cc.Id,
                     CreatedAt = cc.CreatedAt,
@@ -66,15 +69,42 @@ namespace HallDiningTokenSystem.Controllers
                 })
                 .ToList();
 
+            // Get recent settlements
+            var recentSettlements = await _context.CashSettlements
+                .Where(cs => cs.CashAdminId == currentUser.Id)
+                .Include(cs => cs.ReceivedByAdmin)
+                .OrderByDescending(cs => cs.SettlementDate)
+                .Take(5)
+                .ToListAsync();
+
+            var recentSettlementsList = recentSettlements
+                .Select(cs => new ViewModels.RecentSettlementViewModel
+                {
+                    Id = cs.Id,
+                    Amount = cs.Amount,
+                    SettlementDate = cs.SettlementDate,
+                    ReceivedByAdminName = cs.ReceivedByAdmin?.FullName ?? "Unknown",
+                    Note = cs.Note
+                })
+                .ToList();
+
+            // Financial consistency check
+            var isConsistent = await _settlementService.VerifyFinancialConsistencyAsync(currentUser.Id);
+
             // Build view model
             var dashboardModel = new CashAdminDashboardViewModel
             {
                 TotalCollected = totalCollected,
-                TodayCollected = todayCollected,
-                TotalTopUps = totalTopUps,
+                TodayCollected = collections
+                    .Where(cc => cc.CreatedAt.Date == DateTime.Now.Date)
+                    .Sum(cc => cc.Amount),
+                TotalTopUps = collectionCount,
                 TotalSettled = totalSettled,
-                PendingCash = pendingCash,
-                RecentTopUps = recentTopUps
+                PendingCash = pendingSettlement,
+                PendingRequestCount = pendingRequestCount,
+                PendingRequested = pendingRequestedAmount,
+                RecentTopUps = recentTopUps,
+                IsFinanciallyConsistent = isConsistent
             };
 
             return View(dashboardModel);
@@ -243,25 +273,24 @@ namespace HallDiningTokenSystem.Controllers
                 .OrderByDescending(csr => csr.RequestedAt)
                 .ToListAsync();
 
-            // Calculate metrics
-            var totalCollected = collections.Sum(cc => cc.Amount);
-            var totalSettled = settlements.Sum(cs => cs.Amount);
+            // Use SettlementService for consistent calculations
+            var totalCollected = await _settlementService.GetTotalCollectedAsync(currentUser.Id);
+            var totalSettled = await _settlementService.GetTotalSettledAsync(currentUser.Id);
+            var pendingSettlement = await _settlementService.GetPendingSettlementAsync(currentUser.Id);
             var pendingRequested = settlementRequests.Where(csr => csr.Status == "Pending").Sum(csr => csr.Amount);
-            var pendingCash = totalCollected - totalSettled;
-            var availablePendingCash = pendingCash - pendingRequested;
-            var totalTopUps = collections.Count;
+            var availablePendingCash = pendingSettlement;
 
             // Build view model
-            var statementModel = new CashStatementViewModel
+            var statementModel = new ViewModels.CashStatementViewModel
             {
                 TotalCollected = totalCollected,
                 TotalSettled = totalSettled,
                 PendingRequested = pendingRequested,
                 AvailablePendingCash = availablePendingCash,
-                PendingCash = pendingCash,
-                TotalTopUps = totalTopUps,
+                PendingCash = pendingSettlement,
+                TotalTopUps = collections.Count,
                 RecentCollections = collections
-                    .Select(cc => new CashCollectionItemViewModel
+                    .Select(cc => new ViewModels.CashCollectionItemViewModel
                     {
                         Id = cc.Id,
                         CreatedAt = cc.CreatedAt,
@@ -273,7 +302,7 @@ namespace HallDiningTokenSystem.Controllers
                     })
                     .ToList(),
                 SettlementHistory = settlements
-                    .Select(cs => new SettlementHistoryItemViewModel
+                    .Select(cs => new ViewModels.SettlementHistoryItemViewModel
                     {
                         Id = cs.Id,
                         SettlementDate = cs.SettlementDate,
@@ -283,7 +312,7 @@ namespace HallDiningTokenSystem.Controllers
                     })
                     .ToList(),
                 SettlementRequests = settlementRequests
-                    .Select(csr => new SettlementRequestHistoryItemViewModel
+                    .Select(csr => new ViewModels.SettlementRequestHistoryItemViewModel
                     {
                         Id = csr.Id,
                         RequestedAt = csr.RequestedAt,
@@ -299,6 +328,55 @@ namespace HallDiningTokenSystem.Controllers
             return View(statementModel);
         }
 
+        // Settlement History GET
+        public async Task<IActionResult> SettlementHistory()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                TempData["Error"] = "Current user not found.";
+                return RedirectToAction("Dashboard");
+            }
+
+            // Get all settlement requests for current CashAdmin using SettlementService
+            var allRequests = await _settlementService.GetSettlementRequestsAsync(currentUser.Id);
+
+            // Calculate statistics
+            var pendingCount = allRequests.Count(r => r.Status == "Pending");
+            var approvedCount = allRequests.Count(r => r.Status == "Approved");
+            var rejectedCount = allRequests.Count(r => r.Status == "Rejected");
+
+            var totalRequested = allRequests.Sum(r => r.Amount);
+            var totalApproved = allRequests
+                .Where(r => r.Status == "Approved")
+                .Sum(r => r.Amount);
+
+            // Build view model
+            var viewModel = new CashAdminSettlementHistoryViewModel
+            {
+                Requests = allRequests
+                    .Select(csr => new ViewModels.SettlementRequestHistoryItemViewModel
+                    {
+                        Id = csr.Id,
+                        Amount = csr.Amount,
+                        RequestedAt = csr.RequestedAt,
+                        Status = csr.Status,
+                        RequestNote = csr.RequestNote,
+                        ReviewedAt = csr.ReviewedAt,
+                        ReviewedByAdminName = csr.ReviewedByAdmin?.FullName ?? "Unknown",
+                        AdminNote = csr.AdminNote
+                    })
+                    .ToList(),
+                PendingCount = pendingCount,
+                ApprovedCount = approvedCount,
+                RejectedCount = rejectedCount,
+                TotalRequested = totalRequested,
+                TotalApproved = totalApproved
+            };
+
+            return View(viewModel);
+        }
+
         // Request Settlement GET
         public async Task<IActionResult> RequestSettlement()
         {
@@ -309,23 +387,14 @@ namespace HallDiningTokenSystem.Controllers
                 return RedirectToAction("Dashboard");
             }
 
-            // Calculate available pending cash
-            var collections = await _context.CashCollections
-                .Where(cc => cc.CashAdminId == currentUser.Id)
-                .ToListAsync();
+            // Use SettlementService for consistent calculations
+            var totalCollected = await _settlementService.GetTotalCollectedAsync(currentUser.Id);
+            var totalSettled = await _settlementService.GetTotalSettledAsync(currentUser.Id);
+            var availablePendingCash = await _settlementService.GetPendingSettlementAsync(currentUser.Id);
 
-            var settlements = await _context.CashSettlements
-                .Where(cs => cs.CashAdminId == currentUser.Id)
-                .ToListAsync();
-
-            var pendingRequests = await _context.CashSettlementRequests
-                .Where(csr => csr.CashAdminId == currentUser.Id && csr.Status == "Pending")
-                .ToListAsync();
-
-            var totalCollected = collections.Sum(cc => cc.Amount);
-            var totalSettled = settlements.Sum(cs => cs.Amount);
+            // Get pending requests for context
+            var pendingRequests = await _settlementService.GetSettlementRequestsAsync(currentUser.Id, "Pending");
             var pendingRequestedAmount = pendingRequests.Sum(csr => csr.Amount);
-            var availablePendingCash = totalCollected - totalSettled - pendingRequestedAmount;
 
             // Store in ViewData for view
             ViewData["TotalCollected"] = totalCollected;

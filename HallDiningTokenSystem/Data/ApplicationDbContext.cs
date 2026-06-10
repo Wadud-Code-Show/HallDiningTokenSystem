@@ -68,6 +68,13 @@ namespace HallDiningTokenSystem.Data
                 .HasForeignKey(mt => mt.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<MealToken>()
+                .HasOne(mt => mt.RedeemedBy)
+                .WithMany()
+                .HasForeignKey(mt => mt.RedeemedById)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
             // Configure CashCollection relationships
             builder.Entity<CashCollection>()
                 .HasOne(cc => cc.CashAdmin)

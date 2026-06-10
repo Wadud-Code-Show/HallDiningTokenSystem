@@ -1,0 +1,178 @@
+@model MyTokensViewModel
+
+@{
+    ViewData["Title"] = "My Tokens";
+}
+
+<div class="container-fluid py-5">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold">My Meal Tokens</h1>
+                    <p class="text-muted mb-0">@Model?.StudentName (@Model?.StudentId)</p>
+                </div>
+                <a href="@Url.Action("Meals", "Student")" class="btn btn-outline-secondary">
+                    ← Back to Meals
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tokens List -->
+    <div class="row">
+        <div class="col-lg-12">
+            @if (Model?.Tokens == null || Model.Tokens.Count == 0)
+            {
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body p-5 text-center">
+                        <i class="bi bi-ticket-perforated" style="font-size: 3rem; color: #ccc;"></i>
+                        <h5 class="mt-3 text-muted">No Tokens Yet</h5>
+                        <p class="text-muted mb-0">You haven't purchased any meal tokens yet. Visit the Available Meals page to purchase tokens.</p>
+                        <a href="@Url.Action("Meals", "Student")" class="btn btn-primary mt-3">Browse Available Meals</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    @foreach (var token in Model.Tokens)
+                    {
+                        <div class="col-lg-6 col-xl-4 mb-4">
+                            <div class="card border-0 shadow-sm rounded-3 h-100">
+                                <!-- Token Header with Status Badge -->
+                                <div class="card-header bg-light border-bottom-0 d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-0 text-truncate" title="@token.MealName">@token.MealName</h6>
+                                        <small class="text-muted">Purchased: @token.PurchaseDate.ToString("dd MMM yyyy hh:mm tt")</small>
+                                    </div>
+                                    <span class="badge @token.GetStatusBadgeClass() ms-2">@token.GetStatusDisplay()</span>
+                                </div>
+
+                                <div class="card-body">
+                                    <!-- OTP Display - Prominent -->
+                                    <div class="otp-container p-4 bg-light rounded mb-4 text-center border-2 border-primary">
+                                        <small class="d-block text-muted mb-2">OTP Code</small>
+                                        <h2 class="fw-bold text-primary mb-0 font-monospace" style="letter-spacing: 4px;">
+                                            @token.OtpCode
+                                        </h2>
+                                        <small class="d-block text-muted mt-2">Present this code at meal collection</small>
+                                    </div>
+
+                                    <!-- Token Details -->
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <p class="text-muted small mb-1">Created</p>
+                                            <p class="fw-bold mb-0 small">@token.CreatedAt.ToString("dd MMM yyyy")</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <p class="text-muted small mb-1">Status</p>
+                                            <p class="fw-bold mb-0 small">
+                                                @if (token.Status == "Active" && token.IsExpired)
+                                                {
+                                                    <span class="text-danger">Expired</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@token.Status</span>
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Meal Serving Phase -->
+                                    <hr class="my-3" />
+                                    <div class="alert alert-info-light small p-3 rounded mb-0">
+                                        <div class="mb-2">
+                                            <strong>Meal Serving Phase:</strong>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <small class="d-block text-muted">Serving Start</small>
+                                                <small class="fw-bold">@token.MealServingStart.ToString("dd MMM, hh:mm tt")</small>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="d-block text-muted">Serving End</small>
+                                                <small class="fw-bold">@token.MealServingEnd.ToString("dd MMM, hh:mm tt")</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Summary Section -->
+                <div class="row mt-5">
+                    <div class="col-lg-12">
+                        <div class="card border-0 shadow-sm rounded-3">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-3">Token Summary</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <h3 class="text-success">@Model.Tokens.Count(t => t.Status == "Active" && !t.IsExpired)</h3>
+                                            <p class="text-muted small mb-0">Active Tokens</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <h3 class="text-primary">@Model.Tokens.Count(t => t.Status == "Redeemed")</h3>
+                                            <p class="text-muted small mb-0">Redeemed Tokens</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <h3 class="text-danger">@Model.Tokens.Count(t => t.IsExpired)</h3>
+                                            <p class="text-muted small mb-0">Expired Tokens</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Meals", "Student")" class="btn btn-primary">
+                    <i class="bi bi-bookmark-plus"></i> Purchase More Tokens
+                </a>
+                <a href="@Url.Action("WalletHistory", "Student")" class="btn btn-outline-primary">
+                    <i class="bi bi-receipt"></i> View Wallet History
+                </a>
+                <a href="@Url.Action("Dashboard", "Student")" class="btn btn-outline-secondary">
+                    <i class="bi bi-house"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .alert-info-light {
+        background-color: #e7f3ff;
+        border: 1px solid #cce5ff;
+    }
+
+    .font-monospace {
+        font-family: 'Courier New', monospace;
+    }
+
+    .otp-container {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .otp-container:hover {
+        background-color: #f0f0f0 !important;
+        transform: scale(1.02);
+    }
+</style>

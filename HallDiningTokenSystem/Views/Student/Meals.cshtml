@@ -38,8 +38,8 @@
                             <tr>
                                 <th>Meal Name</th>
                                 <th>Price</th>
-                                <th>Start Time</th>
-                                <th>End Time</th>
+                                <th>Sale Start</th>
+                                <th>Sale End</th>
                                 <th>Status</th>
                                 <th>Remaining Capacity</th>
                                 <th>Actions</th>
@@ -99,7 +99,7 @@
                             </div>
 
                             <p class="card-text text-muted small mb-3">
-                                @meal.TokenSellStartDateTime.ToString("dd MMM") - @meal.TokenSellEndDateTime.ToString("dd MMM")
+                                <strong>Sale:</strong> @meal.TokenSellStartDateTime.ToString("dd MMM") - @meal.TokenSellEndDateTime.ToString("dd MMM")
                             </p>
 
                             <div class="mb-3">
@@ -164,7 +164,7 @@
                     <i class="bi bi-info-circle"></i> Purchase Information
                 </h5>
                 <p class="mb-0">
-                    Click on any meal to view full details and purchase a token. You can only purchase tokens for upcoming and active meals.
+                    Click on any meal to view full details and purchase a token. You can browse upcoming meals and purchase tokens for sale-open meals.
                     Your wallet balance will be deducted immediately upon purchase.
                 </p>
             </div>

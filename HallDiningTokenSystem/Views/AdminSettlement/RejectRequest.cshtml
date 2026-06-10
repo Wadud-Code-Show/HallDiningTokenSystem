@@ -1,0 +1,120 @@
+@model RejectSettlementRequestViewModel
+
+@{
+    ViewData["Title"] = "Reject Settlement Request";
+}
+
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="fw-bold mb-2">Reject Settlement Request</h1>
+            <p class="text-muted">Provide a reason for rejecting this settlement request.</p>
+        </div>
+    </div>
+
+    <!-- Request Summary -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Request Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">CashAdmin</p>
+                            <p class="fw-bold">@Model.CashAdminName</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">Requested Amount</p>
+                            <p class="fw-bold text-danger" style="font-size: 1.5rem;">৳@Model.Amount.ToString("N2")</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">Requested At</p>
+                            <p class="fw-bold">@Model.RequestedAt.ToString("MMM dd, yyyy hh:mm tt")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">Request ID</p>
+                            <p class="fw-bold">#@Model.RequestId</p>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.RequestNote))
+                    {
+                        <div class="mb-4">
+                            <p class="text-muted small mb-1">CashAdmin's Note</p>
+                            <div class="alert alert-light border-start border-4 border-warning">
+                                <p class="mb-0 text-muted">@Model.RequestNote</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rejection Form -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Rejection Reason</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate class="needs-validation">
+                        @Html.HiddenFor(m => m.RequestId)
+                        @Html.HiddenFor(m => m.Amount)
+
+                        <div class="mb-4">
+                            <label for="RejectionReason" class="form-label fw-bold">
+                                Rejection Reason <span class="text-danger">*</span>
+                            </label>
+                            <textarea id="RejectionReason" name="RejectionReason" class="form-control" rows="5" 
+                                      placeholder="Explain why this settlement request is being rejected. Be specific and clear for audit trail."
+                                      required></textarea>
+                            <div class="form-text">This reason will be recorded in the audit trail and communicated to the CashAdmin.</div>
+                        </div>
+
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-circle"></i>
+                            <strong>Common Reasons:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Discrepancy in reported amount vs. physical count</li>
+                                <li>Missing documentation or audit trail</li>
+                                <li>CashAdmin records don't match system records</li>
+                                <li>Pending investigation or review required</li>
+                                <li>Amount exceeds available pending cash</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("PendingRequests", "AdminSettlement")" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-x-circle"></i> Reject Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Important Notice -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle"></i>
+                <strong>Note:</strong> The CashAdmin will be able to see the rejection reason and can resubmit the request after addressing the issue. This action will be recorded in the audit trail.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

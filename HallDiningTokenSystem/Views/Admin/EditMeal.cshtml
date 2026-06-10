@@ -42,7 +42,7 @@
                     <strong>Field Restrictions Active</strong>
                     <p class="mb-0 mt-2">
                         Some fields are locked because @Model.SoldCount token(s) have already been sold.
-                        Price and Start Time cannot be modified.
+                        Price and Sale Start cannot be modified.
                     </p>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -101,7 +101,7 @@
                                         @if (Model.SoldCount > 0)
                                         {
                                             <div class="mb-3">
-                                                <label asp-for="TokenSellStartDateTime" class="form-label fw-bold">Token Sale Start <span class="text-danger">*</span> <span class="badge bg-warning text-dark">Locked</span></label>
+                                                <label asp-for="TokenSellStartDateTime" class="form-label fw-bold">Sale Start <span class="text-danger">*</span> <span class="badge bg-warning text-dark">Locked</span></label>
                                                 <input asp-for="TokenSellStartDateTime" type="datetime-local" class="form-control" disabled />
                                                 <small class="text-muted d-block mt-2">Locked because tokens were already sold.</small>
                                             </div>
@@ -109,7 +109,7 @@
                                         else
                                         {
                                             <div class="mb-3">
-                                                <label asp-for="TokenSellStartDateTime" class="form-label fw-bold">Token Sale Start <span class="text-danger">*</span></label>
+                                                <label asp-for="TokenSellStartDateTime" class="form-label fw-bold">Sale Start <span class="text-danger">*</span></label>
                                                 <input asp-for="TokenSellStartDateTime" type="datetime-local" class="form-control" />
                                                 <span asp-validation-for="TokenSellStartDateTime" class="text-danger small d-block mt-1"></span>
                                                 <small class="text-muted d-block mt-2">When students can start buying tokens.</small>
@@ -118,7 +118,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label asp-for="TokenSellEndDateTime" class="form-label fw-bold">Token Sale End <span class="text-danger">*</span></label>
+                                            <label asp-for="TokenSellEndDateTime" class="form-label fw-bold">Sale End <span class="text-danger">*</span></label>
                                             <input asp-for="TokenSellEndDateTime" type="datetime-local" class="form-control" />
                                             <span asp-validation-for="TokenSellEndDateTime" class="text-danger small d-block mt-1"></span>
                                             <small class="text-muted d-block mt-2">When token purchasing closes.</small>
@@ -135,7 +135,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label asp-for="MealServingStartDateTime" class="form-label fw-bold">Meal Serving Start <span class="text-danger">*</span></label>
+                                            <label asp-for="MealServingStartDateTime" class="form-label fw-bold">Serving Start <span class="text-danger">*</span></label>
                                             <input asp-for="MealServingStartDateTime" type="datetime-local" class="form-control" />
                                             <span asp-validation-for="MealServingStartDateTime" class="text-danger small d-block mt-1"></span>
                                             <small class="text-muted d-block mt-2">When meal collection starts.</small>
@@ -143,7 +143,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label asp-for="MealServingEndDateTime" class="form-label fw-bold">Meal Serving End <span class="text-danger">*</span></label>
+                                            <label asp-for="MealServingEndDateTime" class="form-label fw-bold">Serving End <span class="text-danger">*</span></label>
                                             <input asp-for="MealServingEndDateTime" type="datetime-local" class="form-control" />
                                             <span asp-validation-for="MealServingEndDateTime" class="text-danger small d-block mt-1"></span>
                                             <small class="text-muted d-block mt-2">When meal collection closes.</small>
@@ -200,8 +200,8 @@
                 <strong>Edit Rules:</strong>
                 <ul class="mb-0 mt-2">
                     <li>Expired meals cannot be edited.</li>
-                    <li>If tokens are sold, Price and Start Time are locked for financial integrity.</li>
-                    <li>End Time can always be adjusted (to extend or close sales).</li>
+                    <li>If tokens are sold, Price and Sale Start are locked for financial integrity.</li>
+                    <li>Sale End can always be adjusted (to extend or close sales).</li>
                 </ul>
             </div>
         </div>

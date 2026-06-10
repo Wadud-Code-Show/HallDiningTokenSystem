@@ -1,0 +1,217 @@
+@model CashAdminSettlementHistoryViewModel
+
+@{
+    ViewData["Title"] = "Settlement History";
+}
+
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <h1 class="fw-bold mb-2">Settlement History</h1>
+            <p class="text-muted">Track all your cash settlement requests and approvals.</p>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Pending</p>
+                            <h4 class="fw-bold mb-0">@Model.PendingCount</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Approved</p>
+                            <h4 class="fw-bold mb-0">@Model.ApprovedCount</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Rejected</p>
+                            <h4 class="fw-bold mb-0">@Model.RejectedCount</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-3 h-100 bg-light">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Total Approved</p>
+                            <h4 class="fw-bold mb-0">৳@Model.TotalApproved.ToString("N2")</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settlement Requests Table -->
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">All Requests</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Requests.Count == 0)
+                    {
+                        <div class="p-5 text-center text-muted">
+                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                            <p class="mt-3">No settlement requests yet.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Request ID</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Requested</th>
+                                        <th>Reviewed At</th>
+                                        <th>Reviewer</th>
+                                        <th>Notes</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var request in Model.Requests.OrderByDescending(r => r.RequestedAt))
+                                    {
+                                        <tr>
+                                            <td class="fw-bold">#@request.Id</td>
+                                            <td>৳@request.Amount.ToString("N2")</td>
+                                            <td>
+                                                <span class="badge @request.StatusBadge">@request.Status</span>
+                                            </td>
+                                            <td>
+                                                <small>@request.TimeAgoRequested<br />@request.RequestedAt.ToString("MMM dd, yyyy hh:mm tt")</small>
+                                            </td>
+                                            <td>
+                                                @if (request.ReviewedAt.HasValue)
+                                                {
+                                                    <small>@request.ReviewedAt.Value.ToString("MMM dd, yyyy hh:mm tt")</small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(request.ReviewedByAdminName))
+                                                {
+                                                    <small>@request.ReviewedByAdminName</small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(request.RequestNote))
+                                                {
+                                                    <small class="text-muted">Req: @request.RequestNote.Substring(0, Math.Min(20, request.RequestNote.Length))...</small>
+                                                }
+                                                @if (!string.IsNullOrEmpty(request.AdminNote))
+                                                {
+                                                    <br />
+                                                    <small class="text-muted">Admin: @request.AdminNote.Substring(0, Math.Min(20, request.AdminNote.Length))...</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailsModal_@request.Id">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Details Modal -->
+                                        <div class="modal fade" id="detailsModal_@request.Id" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Request Details #@request.Id</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <label class="form-label text-muted small">Amount</label>
+                                                            <p class="fw-bold">৳@request.Amount.ToString("N2")</p>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label text-muted small">Status</label>
+                                                            <p><span class="badge @request.StatusBadge">@request.Status</span></p>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label text-muted small">Requested At</label>
+                                                            <p>@request.RequestedAt.ToString("MMM dd, yyyy hh:mm tt")</p>
+                                                        </div>
+                                                        @if (!string.IsNullOrEmpty(request.RequestNote))
+                                                        {
+                                                            <div class="mb-3">
+                                                                <label class="form-label text-muted small">Your Request Note</label>
+                                                                <p class="text-muted">@request.RequestNote</p>
+                                                            </div>
+                                                        }
+                                                        @if (request.ReviewedAt.HasValue)
+                                                        {
+                                                            <div class="mb-3">
+                                                                <label class="form-label text-muted small">Reviewed By</label>
+                                                                <p>@request.ReviewedByAdminName</p>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label text-muted small">Reviewed At</label>
+                                                                <p>@request.ReviewedAt.Value.ToString("MMM dd, yyyy hh:mm tt")</p>
+                                                            </div>
+                                                            @if (!string.IsNullOrEmpty(request.AdminNote))
+                                                            {
+                                                                <div class="mb-3">
+                                                                    <label class="form-label text-muted small">Admin Notes</label>
+                                                                    <p class="text-muted">@request.AdminNote</p>
+                                                                </div>
+                                                            }
+                                                        }
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Alert -->
+    <div class="row mt-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle"></i>
+                <strong>About Settlement Requests:</strong> Once approved by SuperAdmin, cash is handed over in person. All transactions are recorded for audit purposes.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

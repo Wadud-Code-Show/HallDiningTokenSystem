@@ -1,0 +1,212 @@
+@model StudentDetailsReportViewModel
+
+@{
+    ViewData["Title"] = "Student Details - " + Model?.StudentName;
+}
+
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold">@Model?.StudentName</h1>
+                    <p class="text-muted mb-0">Student ID: @Model?.StudentId | Email: @Model?.StudentEmail</p>
+                </div>
+                <a href="@Url.Action("Students", "Reports")" class="btn btn-outline-secondary">← Back to Students</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Information -->
+    <div class="row mb-4">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Current Wallet Balance</p>
+                    <h3 class="fw-bold text-success">৳@Model?.CurrentWalletBalance.ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Total Top-ups</p>
+                    <h3 class="fw-bold">৳@Model?.TotalTopups.ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Total Spending</p>
+                    <h3 class="fw-bold">৳@Model?.TotalSpending.ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Token Statistics -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Token Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3">
+                            <p class="text-muted small mb-1">Total Purchases</p>
+                            <h3 class="fw-bold">@Model?.TotalPurchases</h3>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <p class="text-muted small mb-1">Total Redemptions</p>
+                            <h3 class="fw-bold">@Model?.TotalRedemptions</h3>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <p class="text-muted small mb-1">Redemption Rate</p>
+                            <h3 class="fw-bold">@Model?.RedemptionRate.ToString("N1")%</h3>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <p class="text-muted small mb-1">Unredeemed</p>
+                            <h3 class="fw-bold text-warning">@(Model?.TotalPurchases - Model?.TotalRedemptions)</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Transactions -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Wallet Transactions (@Model?.WalletTransactions.Count)</h5>
+                </div>
+                @if (Model?.WalletTransactions == null || Model.WalletTransactions.Count == 0)
+                {
+                    <div class="card-body p-5 text-center">
+                        <p class="text-muted">No wallet transactions found.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="fw-bold">Date</th>
+                                    <th class="fw-bold">Type</th>
+                                    <th class="fw-bold">Amount</th>
+                                    <th class="fw-bold">Balance After</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var transaction in Model.WalletTransactions)
+                                {
+                                    <tr>
+                                        <td>@transaction.TransactionDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            <span class="badge @transaction.TypeBadgeClass">@transaction.Type</span>
+                                        </td>
+                                        <td>৳@transaction.Amount.ToString("N2")</td>
+                                        <td>৳@transaction.BalanceAfter.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Purchase History -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Purchase History (@Model?.PurchaseHistory.Count)</h5>
+                </div>
+                @if (Model?.PurchaseHistory == null || Model.PurchaseHistory.Count == 0)
+                {
+                    <div class="card-body p-5 text-center">
+                        <p class="text-muted">No purchases found.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="fw-bold">Meal</th>
+                                    <th class="fw-bold">Amount</th>
+                                    <th class="fw-bold">Purchase Date</th>
+                                    <th class="fw-bold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var purchase in Model.PurchaseHistory)
+                                {
+                                    <tr>
+                                        <td>@purchase.MealName</td>
+                                        <td>৳@purchase.Amount.ToString("N2")</td>
+                                        <td>@purchase.PurchaseDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            <span class="badge bg-success">@purchase.Status</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Redemption History -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Redemption History (@Model?.RedemptionHistory.Count)</h5>
+                </div>
+                @if (Model?.RedemptionHistory == null || Model.RedemptionHistory.Count == 0)
+                {
+                    <div class="card-body p-5 text-center">
+                        <p class="text-muted">No redemptions found.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="fw-bold">Meal</th>
+                                    <th class="fw-bold">OTP Code</th>
+                                    <th class="fw-bold">Redeemed At</th>
+                                    <th class="fw-bold">Redeemed By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var redemption in Model.RedemptionHistory)
+                                {
+                                    <tr>
+                                        <td>@redemption.MealName</td>
+                                        <td><code>@redemption.OtpCode</code></td>
+                                        <td>@redemption.RedeemedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>@redemption.RedeemedBy</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

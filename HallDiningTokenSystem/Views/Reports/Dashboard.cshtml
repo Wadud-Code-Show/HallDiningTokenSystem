@@ -1,0 +1,218 @@
+@model ReportDashboardViewModel
+
+@{
+    ViewData["Title"] = "Reports Dashboard";
+}
+
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold">Reports Dashboard</h1>
+                    <p class="text-muted mb-0">System Overview & Analytics</p>
+                </div>
+                <small class="text-muted">Generated: @Model?.GeneratedAt.ToString("dd/MM/yyyy HH:mm:ss")</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <!-- Total Students -->
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Students</p>
+                            <h3 class="fw-bold mb-0">@Model?.TotalStudents</h3>
+                        </div>
+                        <i class="bi bi-people-fill text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                    <small class="text-muted d-block mt-2">Active users with student ID</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Meals -->
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Meals</p>
+                            <h3 class="fw-bold mb-0">@Model?.TotalMeals</h3>
+                        </div>
+                        <i class="bi bi-egg-fried text-success" style="font-size: 2rem;"></i>
+                    </div>
+                    <small class="text-muted d-block mt-2">Created and managed</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tokens Sold -->
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Tokens Sold</p>
+                            <h3 class="fw-bold mb-0">@Model?.TokensSold</h3>
+                        </div>
+                        <i class="bi bi-ticket-perforated text-info" style="font-size: 2rem;"></i>
+                    </div>
+                    <small class="text-muted d-block mt-2">Purchased by students</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tokens Redeemed -->
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Tokens Redeemed</p>
+                            <h3 class="fw-bold mb-0">@Model?.TokensRedeemed</h3>
+                        </div>
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i>
+                    </div>
+                    <small class="text-muted d-block mt-2">Used during meal service</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Summary -->
+    <div class="row mb-4">
+        <!-- Total Revenue -->
+        <div class="col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Revenue</p>
+                            <h2 class="fw-bold mb-2">৳@Model?.TotalRevenue.ToString("N2")</h2>
+                            <small class="text-muted">From all completed token purchases</small>
+                        </div>
+                        <i class="bi bi-cash-stack text-success" style="font-size: 2.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current System Wallet Balance -->
+        <div class="col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Wallet Balance</p>
+                            <h2 class="fw-bold mb-2">৳@Model?.CurrentWalletBalance.ToString("N2")</h2>
+                            <small class="text-muted">Across all student wallets</small>
+                        </div>
+                        <i class="bi bi-wallet2 text-info" style="font-size: 2.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Key Metrics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-3">
+                            <h6 class="text-muted small">Redemption Rate</h6>
+                            <h3 class="fw-bold">@Model?.RedemptionRate.ToString("N1")%</h3>
+                            <small class="text-muted">Tokens redeemed vs sold</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <h6 class="text-muted small">Avg Revenue per Meal</h6>
+                            <h3 class="fw-bold">৳@Model?.AverageRevenuePerMeal.ToString("N2")</h3>
+                            <small class="text-muted">Total revenue ÷ total meals</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <h6 class="text-muted small">Active Students</h6>
+                            <h3 class="fw-bold">@Model?.ActiveStudents</h3>
+                            <small class="text-muted">With registered accounts</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Reports -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-bottom-0">
+                    <h5 class="mb-0">Quick Access Reports</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <a href="@Url.Action("Meals", "Reports")" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between">
+                                <span>Meal Report</span>
+                                <i class="bi bi-egg-fried"></i>
+                            </a>
+                            <small class="text-muted d-block mt-2 text-center">View all meals, sales, and revenue</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="@Url.Action("Students", "Reports")" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between">
+                                <span>Student Report</span>
+                                <i class="bi bi-people-fill"></i>
+                            </a>
+                            <small class="text-muted d-block mt-2 text-center">Student activity and spending</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="@Url.Action("Redemptions", "Reports")" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between">
+                                <span>Redemption Report</span>
+                                <i class="bi bi-check-circle-fill"></i>
+                            </a>
+                            <small class="text-muted d-block mt-2 text-center">Token redemption log</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="@Url.Action("Wallets", "Reports")" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between">
+                                <span>Wallet Report</span>
+                                <i class="bi bi-wallet2"></i>
+                            </a>
+                            <small class="text-muted d-block mt-2 text-center">Wallet balances and transactions</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="@Url.Action("Settlements", "Reports")" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between">
+                                <span>Settlement Report</span>
+                                <i class="bi bi-credit-card-2-front"></i>
+                            </a>
+                            <small class="text-muted d-block mt-2 text-center">Cash admin settlements</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #0d6efd;
+        color: white;
+    }
+</style>

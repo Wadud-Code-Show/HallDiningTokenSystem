@@ -81,7 +81,7 @@
             <div class="card border-0 shadow-sm rounded-3">
                 <div class="card-body text-center">
                     <h6 class="text-muted small mb-2">Total Tokens Sold</h6>
-                    <h2 class="fw-bold text-info">@(Model?.Sum(m => m.Orders.Count) ?? 0)</h2>
+                    <h2 class="fw-bold text-info">@(Model?.Sum(m => m.SoldCount) ?? 0)</h2>
                 </div>
             </div>
         </div>
@@ -95,9 +95,9 @@
                    class="btn @(currentFilter == "All" ? "btn-primary" : "btn-outline-primary")">
                     All
                 </a>
-                <a href="@Url.Action("MealHistory", "Admin", new { filter = "Expired" })"
-                   class="btn @(currentFilter == "Expired" ? "btn-danger" : "btn-outline-danger")">
-                    Expired
+                <a href="@Url.Action("MealHistory", "Admin", new { filter = "Completed" })"
+                   class="btn @(currentFilter == "Completed" ? "btn-danger" : "btn-outline-danger")">
+                    Completed
                 </a>
                 <a href="@Url.Action("MealHistory", "Admin", new { filter = "Archived" })"
                    class="btn @(currentFilter == "Archived" ? "btn-dark" : "btn-outline-dark")">
@@ -118,8 +118,8 @@
                             <tr>
                                 <th>Meal Name</th>
                                 <th>Price</th>
-                                <th>Start Time</th>
-                                <th>End Time</th>
+                                <th>Sale Start</th>
+                                <th>Serving End</th>
                                 <th>Status</th>
                                 <th>Sold Count</th>
                                 <th>Created</th>

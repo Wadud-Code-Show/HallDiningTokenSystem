@@ -10,5 +10,7 @@ namespace HallDiningTokenSystem.Models
         public DateTime CreatedAt { get; set; }
         public DateTime? RedeemedAt { get; set; }
         public DateTime? ExpiresAt { get; set; }
+        public string? RedeemedById { get; set; } // DeliveryMan who redeemed the token
+        public ApplicationUser? RedeemedBy { get; set; }
     }
 }

@@ -1,0 +1,131 @@
+@model WalletReportViewModel
+
+@{
+    ViewData["Title"] = "Wallet Report";
+}
+
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold">Wallet Report</h1>
+                    <p class="text-muted mb-0">Student wallet balances and transactions</p>
+                </div>
+                <a href="@Url.Action("Dashboard", "Reports")" class="btn btn-outline-secondary">← Back</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Total Wallets</p>
+                    <h3 class="fw-bold">@Model?.TotalWallets</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Total Balance</p>
+                    <h3 class="fw-bold">৳@Model?.TotalBalance.ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Average Balance</p>
+                    <h3 class="fw-bold">৳@Model?.AverageBalance.ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Summary -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Total Top-ups</p>
+                    <h3 class="fw-bold text-success">৳@Model?.TotalTopups.ToString("N2")</h3>
+                    <small class="text-muted">Cash added to wallets</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Total Spending</p>
+                    <h3 class="fw-bold text-danger">৳@Model?.TotalSpending.ToString("N2")</h3>
+                    <small class="text-muted">Spent on token purchases</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallets Table -->
+    <div class="row">
+        <div class="col-lg-12">
+            @if (Model?.Wallets == null || Model.Wallets.Count == 0)
+            {
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body p-5 text-center">
+                        <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                        <h5 class="mt-3 text-muted">No Wallets Found</h5>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="fw-bold">Student Name</th>
+                                    <th class="fw-bold">Student ID</th>
+                                    <th class="fw-bold">Current Balance</th>
+                                    <th class="fw-bold">Total Top-ups</th>
+                                    <th class="fw-bold">Total Spending</th>
+                                    <th class="fw-bold">Net Position</th>
+                                    <th class="fw-bold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var wallet in Model.Wallets)
+                                {
+                                    <tr>
+                                        <td>@wallet.StudentName</td>
+                                        <td>@wallet.StudentId</td>
+                                        <td>
+                                            <span class="fw-bold @wallet.BalanceStatusColor">
+                                                ৳@wallet.CurrentBalance.ToString("N2")
+                                            </span>
+                                        </td>
+                                        <td>৳@wallet.TotalTopups.ToString("N2")</td>
+                                        <td>৳@wallet.TotalSpending.ToString("N2")</td>
+                                        <td>
+                                            <span class="fw-bold @wallet.BalanceStatusColor">
+                                                ৳@wallet.NetPosition.ToString("N2")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(wallet.BalanceStatus == "Positive" ? "bg-success" : wallet.BalanceStatus == "Zero" ? "bg-warning" : "bg-danger")">
+                                                @wallet.BalanceStatus
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

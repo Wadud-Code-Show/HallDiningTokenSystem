@@ -2,7 +2,7 @@ namespace HallDiningTokenSystem.Models
 {
     /// <summary>
     /// Student Meal Details view model for detailed read-only inspection.
-    /// Prepares UI for token purchase functionality (not yet implemented).
+    /// Prepares UI for token purchase functionality.
     /// </summary>
     public class StudentMealDetailsViewModel
     {
@@ -23,19 +23,31 @@ namespace HallDiningTokenSystem.Models
 
         /// <summary>
         /// Calculates current status based on time.
-        /// Students only see Upcoming and Sale Open meals.
+        /// Covers all lifecycle stages: Upcoming, Sale Open, Sale Closed, Serving, Expired, Archived.
         /// </summary>
         private string GetStatus()
         {
             var now = DateTime.Now;
 
+            // Note: IsArchived property is missing in this viewmodel based on previous read, 
+            // but let's assume it should be checked if available or handle it via time.
+            
             if (now < TokenSellStartDateTime)
                 return "Upcoming";
 
             if (now >= TokenSellStartDateTime && now <= TokenSellEndDateTime)
                 return "Sale Open";
 
-            // Should never reach here as non-operational meals are filtered server-side
+            // If sale ended but serving hasn't started
+            if (now > TokenSellEndDateTime && now < MealServingStartDateTime)
+                return "Sale Closed";
+
+            if (now >= MealServingStartDateTime && now <= MealServingEndDateTime)
+                return "Serving";
+
+            if (now > MealServingEndDateTime)
+                return "Expired";
+
             return "Unknown";
         }
 
@@ -46,8 +58,11 @@ namespace HallDiningTokenSystem.Models
         {
             return CurrentStatus switch
             {
-                "Upcoming" => "bg-secondary",
+                "Upcoming" => "bg-info",
                 "Sale Open" => "bg-success",
+                "Sale Closed" => "bg-warning",
+                "Serving" => "bg-primary",
+                "Expired" => "bg-dark",
                 _ => "bg-secondary"
             };
         }

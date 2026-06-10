@@ -1,0 +1,272 @@
+@using HallDiningTokenSystem.ViewModels
+@model List<SettlementRequestHistoryItemViewModel>
+
+@{
+    ViewData["Title"] = "Settlement Request Audit Trail";
+}
+
+<div class="container-fluid py-5">
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold mb-2">Settlement Request Audit Trail</h1>
+                    <p class="text-muted">Complete audit history of all settlement requests and decisions.</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Dashboard", "AdminSettlement")" class="btn btn-outline-secondary">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="row g-3">
+                <div class="col-md-2">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Total Requests</p>
+                            <h3 class="fw-bold mb-0">@Model.Count</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Approved</p>
+                            <h3 class="fw-bold mb-0 text-success">@Model.Count(r => r.Status == "Approved")</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Rejected</p>
+                            <h3 class="fw-bold mb-0 text-danger">@Model.Count(r => r.Status == "Rejected")</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Pending</p>
+                            <h3 class="fw-bold mb-0 text-warning">@Model.Count(r => r.Status == "Pending")</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Total Requested</p>
+                            <h3 class="fw-bold mb-0">৳@Model.Sum(r => r.Amount).ToString("N0")</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Approved Amount</p>
+                            <h3 class="fw-bold mb-0 text-success">৳@Model.Where(r => r.Status == "Approved").Sum(r => r.Amount).ToString("N0")</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit Records Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Audit Records</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Count == 0)
+                    {
+                        <div class="p-5 text-center text-muted">
+                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                            <p class="mt-3">No audit records found.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Request ID</th>
+                                        <th>Status</th>
+                                        <th>Amount</th>
+                                        <th>Requested At</th>
+                                        <th>Reviewed By</th>
+                                        <th>Reviewed At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var record in Model.OrderByDescending(r => r.RequestedAt))
+                                    {
+                                        <tr>
+                                            <td class="fw-bold">#@record.Id</td>
+                                            <td>
+                                                @if (record.Status == "Approved")
+                                                {
+                                                    <span class="badge bg-success">@record.Status</span>
+                                                }
+                                                else if (record.Status == "Rejected")
+                                                {
+                                                    <span class="badge bg-danger">@record.Status</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">@record.Status</span>
+                                                }
+                                            </td>
+                                            <td>৳@record.Amount.ToString("N2")</td>
+                                            <td>
+                                                <small>@record.RequestedAt.ToString("MMM dd, yyyy HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(record.ReviewedByAdminName))
+                                                {
+                                                    <small>@record.ReviewedByAdminName</small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (record.ReviewedAt.HasValue)
+                                                {
+                                                    <small>@record.ReviewedAt.Value.ToString("MMM dd, yyyy HH:mm")</small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#auditModal_@record.Id">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Audit Details Modal -->
+                                        <div class="modal fade" id="auditModal_@record.Id" tabindex="-1">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Audit Trail #@record.Id</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="row mb-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label text-muted small">Status</label>
+                                                                <p>
+                                                                    @if (record.Status == "Approved")
+                                                                    {
+                                                                        <span class="badge bg-success">@record.Status</span>
+                                                                    }
+                                                                    else if (record.Status == "Rejected")
+                                                                    {
+                                                                        <span class="badge bg-danger">@record.Status</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="badge bg-warning">@record.Status</span>
+                                                                    }
+                                                                </p>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label text-muted small">Amount</label>
+                                                                <p class="fw-bold">৳@record.Amount.ToString("N2")</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row mb-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label text-muted small">Requested At</label>
+                                                                <p>@record.RequestedAt.ToString("MMM dd, yyyy hh:mm tt")</p>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label text-muted small">Request ID</label>
+                                                                <p class="fw-bold">#@record.Id</p>
+                                                            </div>
+                                                        </div>
+
+                                                        @if (!string.IsNullOrEmpty(record.RequestNote))
+                                                        {
+                                                            <div class="mb-3">
+                                                                <label class="form-label text-muted small">Request Note</label>
+                                                                <p class="text-muted">@record.RequestNote</p>
+                                                            </div>
+                                                        }
+
+                                                        @if (record.ReviewedAt.HasValue)
+                                                        {
+                                                            <hr />
+                                                            <div class="row mb-3">
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label text-muted small">Reviewed By</label>
+                                                                    <p class="fw-bold">@record.ReviewedByAdminName</p>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label text-muted small">Reviewed At</label>
+                                                                    <p>@record.ReviewedAt.Value.ToString("MMM dd, yyyy hh:mm tt")</p>
+                                                                </div>
+                                                            </div>
+
+                                                            @if (!string.IsNullOrEmpty(record.AdminNote))
+                                                            {
+                                                                <div class="mb-3">
+                                                                    <label class="form-label text-muted small">Admin's Review Note</label>
+                                                                    <p class="text-muted">@record.AdminNote</p>
+                                                                </div>
+                                                            }
+                                                        }
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-shield-check"></i>
+                <strong>Audit Trail:</strong> All settlement requests, approvals, and rejections are permanently recorded here for compliance and investigation purposes.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

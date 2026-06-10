@@ -1,4 +1,4 @@
-namespace HallDiningTokenSystem.Models
+namespace HallDiningTokenSystem.ViewModels
 {
     public class CashStatementViewModel
     {
@@ -33,16 +33,4 @@ namespace HallDiningTokenSystem.Models
         public string ReceivedByAdminName { get; set; } = string.Empty;
         public string? Note { get; set; }
     }
-
-    public class SettlementRequestHistoryItemViewModel
-    {
-        public int Id { get; set; }
-        public DateTime RequestedAt { get; set; }
-        public decimal Amount { get; set; }
-        public string Status { get; set; } = "Pending";
-        public string? RequestNote { get; set; }
-        public DateTime? ReviewedAt { get; set; }
-        public string? AdminNote { get; set; }
-    }
 }
-

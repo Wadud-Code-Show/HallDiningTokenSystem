@@ -1,0 +1,148 @@
+@model ApprovSettlementRequestViewModel
+
+@{
+    ViewData["Title"] = "Approve Settlement Request";
+}
+
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="fw-bold mb-2">Approve Settlement Request</h1>
+            <p class="text-muted">Verify the request and approve the settlement.</p>
+        </div>
+    </div>
+
+    <!-- Settlement Request Summary -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Request Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">CashAdmin</p>
+                            <p class="fw-bold">@Model.CashAdminName</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">Requested Amount</p>
+                            <p class="fw-bold text-success" style="font-size: 1.5rem;">৳@Model.Amount.ToString("N2")</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">Requested At</p>
+                            <p class="fw-bold">@Model.RequestedAt.ToString("MMM dd, yyyy hh:mm tt")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">Time Since Request</p>
+                            <p class="fw-bold">@TimeSpan.FromTicks((DateTime.Now - Model.RequestedAt).Ticks).TotalHours.ToString("F1") hours ago</p>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.RequestNote))
+                    {
+                        <div class="mb-4">
+                            <p class="text-muted small mb-1">CashAdmin's Request Note</p>
+                            <div class="alert alert-light border-start border-4 border-warning">
+                                <p class="mb-0 text-muted">@Model.RequestNote</p>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Approval Checklist -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Pre-Approval Checklist</h6>
+                        <div class="form-check mb-2">
+                            <input type="checkbox" id="check1" class="form-check-input" />
+                            <label class="form-check-label" for="check1">
+                                Verified CashAdmin identity
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input type="checkbox" id="check2" class="form-check-input" />
+                            <label class="form-check-label" for="check2">
+                                Counted physical cash - amount verified
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input type="checkbox" id="check3" class="form-check-input" />
+                            <label class="form-check-label" for="check3">
+                                Confirmed no discrepancies in records
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approval Form -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Approval Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate class="needs-validation">
+                        @Html.HiddenFor(m => m.RequestId)
+                        @Html.HiddenFor(m => m.Amount)
+
+                        <div class="mb-4">
+                            <label for="ApprovalNotes" class="form-label fw-bold">Approval Notes (Optional)</label>
+                            <textarea id="ApprovalNotes" name="ApprovalNotes" class="form-control" rows="4" 
+                                      placeholder="E.g., Cash received and counted. Settlement created for CashAdmin: [Name]..."></textarea>
+                            <small class="text-muted d-block mt-2">Include relevant details for audit trail</small>
+                        </div>
+
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Before approving:</strong> Ensure you have physically received and verified the cash amount of ৳@Model.Amount.ToString("N2").
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("PendingRequests", "AdminSettlement")" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle"></i> Approve & Create Settlement
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Important Notice -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="alert alert-danger" role="alert">
+                <i class="bi bi-shield-exclamation"></i>
+                <strong>Critical:</strong> Approving this request creates a CashSettlement record. This action is final and will be audited. Only approve after cash verification is complete.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // Enable submit button only when all checkboxes are checked
+        const checkboxes = document.querySelectorAll('.form-check-input');
+        const submitBtn = document.querySelector('button[type="submit"]');
+
+        function updateSubmitState() {
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            submitBtn.disabled = !allChecked;
+        }
+
+        checkboxes.forEach(cb => cb.addEventListener('change', updateSubmitState));
+
+        // Start with button disabled
+        updateSubmitState();
+    </script>
+}

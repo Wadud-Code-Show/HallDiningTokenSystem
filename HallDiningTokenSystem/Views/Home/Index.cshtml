@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Hall Dining Token Management System";
 }
 
@@ -15,8 +15,8 @@
                     <p class="lead mb-3">OTP-based smart dining token and wallet management system.</p>
                     <p class="text-white-50 mb-4">Students can buy meal tokens using wallet balance, and meals are verified securely using OTP.</p>
                     <div class="d-flex gap-2 justify-content-center">
-                        <a class="btn btn-light" asp-area="Identity" asp-page="/Account/Login">Login</a>
-                        <a class="btn btn-outline-light" asp-area="Identity" asp-page="/Account/Register">Register</a>
+                        <a class="btn btn-light btn-lg" asp-area="Identity" asp-page="/Account/Login">Login to System</a>
+                        <a class="btn btn-outline-light btn-lg" asp-area="Identity" asp-page="/Account/Register">Register as Student</a>
                     </div>
                 </div>
             </div>
@@ -24,100 +24,174 @@
     </section>
 
     <!-- Features Section -->
-    <section class="py-4">
+    <section class="py-5">
         <div class="container">
-            <div class="row g-3">
+            <div class="row g-4">
                 <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm rounded-3">
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <i class="bi bi-wallet2 text-primary" style="font-size: 2rem;"></i>
+                    <div class="card h-100 border-0 shadow-sm rounded-3 hover-shadow">
+                        <div class="card-body p-4 text-center">
+                            <div class="mb-4 text-primary">
+                                <i class="bi bi-wallet2" style="font-size: 3rem;"></i>
                             </div>
                             <h5 class="card-title fw-bold">Wallet Top-up</h5>
-                            <p class="card-text text-muted small">Authorized Cash Admin adds balance to student wallet.</p>
+                            <p class="card-text text-muted">Authorized Cash Admin adds balance to student wallet after physical cash handover.</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm rounded-3">
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <i class="bi bi-key text-primary" style="font-size: 2rem;"></i>
+                    <div class="card h-100 border-0 shadow-sm rounded-3 hover-shadow">
+                        <div class="card-body p-4 text-center">
+                            <div class="mb-4 text-primary">
+                                <i class="bi bi-key" style="font-size: 3rem;"></i>
                             </div>
                             <h5 class="card-title fw-bold">OTP Token Purchase</h5>
-                            <p class="card-text text-muted small">Student buys meal tokens and receives unique OTP.</p>
+                            <p class="card-text text-muted">Students buy meal tokens and receive a unique, secure OTP code for verification.</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm rounded-3">
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <i class="bi bi-truck text-primary" style="font-size: 2rem;"></i>
+                    <div class="card h-100 border-0 shadow-sm rounded-3 hover-shadow">
+                        <div class="card-body p-4 text-center">
+                            <div class="mb-4 text-primary">
+                                <i class="bi bi-check-circle" style="font-size: 3rem;"></i>
                             </div>
                             <h5 class="card-title fw-bold">Secure Meal Delivery</h5>
-                            <p class="card-text text-muted small">DeliveryMan verifies OTP and redeems token once.</p>
+                            <p class="card-text text-muted">Delivery staff verify the student's OTP code to redeem the token and serve the meal.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+    <style>
+        .hover-shadow { transition: transform 0.2s, box-shadow 0.2s; }
+        .hover-shadow:hover { transform: translateY(-5px); box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.1) !important; }
+    </style>
 }
-else if (User.IsInRole("SuperAdmin"))
+else
 {
-    <!-- SUPERADMIN ADMIN PANEL -->
-
     <div class="container py-5">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="card border-0 shadow-sm rounded-3">
-                    <div class="card-body p-5 text-center">
-                        <div class="mb-4">
-                            <i class="bi bi-shield-lock text-primary" style="font-size: 3rem;"></i>
-                        </div>
-                        <h1 class="fw-bold mb-2">Admin Panel</h1>
-                        <p class="text-muted mb-4 lead">Manage meals, reports, and system overview from your dashboard.</p>
-
-                        <div class="mb-3">
-                            <a class="btn btn-primary btn-lg" asp-area="" asp-controller="Admin" asp-action="Dashboard">Go to Admin Dashboard</a>
-                        </div>
-
-                        <div class="d-flex gap-2 justify-content-center flex-wrap mt-4">
-                            <a class="btn btn-outline-primary btn-sm" asp-area="" asp-controller="Admin" asp-action="CreateMeal">Create Meal</a>
-                            <a class="btn btn-outline-primary btn-sm" asp-area="" asp-controller="Admin" asp-action="Meals">View Meal List</a>
-                        </div>
-                    </div>
-                </div>
+        <div class="row mb-4">
+            <div class="col-lg-12">
+                <h1 class="fw-bold">Welcome back, @(User.Identity.Name?.Split('@')[0] ?? "User")!</h1>
+                <p class="text-muted">Quick access to your @(User.IsInRole("SuperAdmin") ? "SuperAdmin" : User.IsInRole("CashAdmin") ? "CashAdmin" : User.IsInRole("DeliveryMan") ? "DeliveryMan" : "Student") dashboard.</p>
             </div>
         </div>
-    </div>
-}
-else if (User.IsInRole("CashAdmin"))
-{
-    <!-- CASHADMIN PANEL -->
 
-    <div class="container py-5">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="card border-0 shadow-sm rounded-3">
-                    <div class="card-body p-5 text-center">
-                        <div class="mb-4">
-                            <i class="bi bi-person-badge text-primary" style="font-size: 3rem;"></i>
-                        </div>
-                        <h1 class="fw-bold mb-2">CashAdmin Panel</h1>
-                        <p class="text-muted mb-4 lead">Manage student wallet top-ups and track cash collections.</p>
-
-                        <div class="mb-3">
-                            <a class="btn btn-primary btn-lg" asp-area="" asp-controller="CashAdmin" asp-action="Dashboard">Go to CashAdmin Dashboard</a>
-                        </div>
-
-                        <div class="d-flex gap-2 justify-content-center flex-wrap mt-4">
-                            <a class="btn btn-outline-primary btn-sm" asp-area="" asp-controller="CashAdmin" asp-action="TopUpWallet">Top-up Student Wallet</a>
-                        </div>
+        <div class="row g-4">
+            @if (User.IsInRole("SuperAdmin"))
+            {
+                <!-- SUPERADMIN CARDS -->
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-3 text-center p-4">
+                        <i class="bi bi-egg-fried text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="fw-bold">Meal Management</h5>
+                        <p class="text-muted small">Create and manage meal sessions, pricing, and timing.</p>
+                        <a asp-controller="Admin" asp-action="Meals" class="btn btn-primary mt-auto">Manage Meals</a>
                     </div>
                 </div>
-            </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-3 text-center p-4">
+                        <i class="bi bi-graph-up-arrow text-success mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="fw-bold">Reports</h5>
+                        <p class="text-muted small">View system-wide revenue, student activity, and analytics.</p>
+                        <a asp-controller="Reports" asp-action="Dashboard" class="btn btn-success mt-auto">View Reports</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-3 text-center p-4">
+                        <i class="bi bi-shield-check text-info mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="fw-bold">Settlement Review</h5>
+                        <p class="text-muted small">Review and approve cash settlement requests from CashAdmins.</p>
+                        <a asp-controller="AdminSettlement" asp-action="PendingRequests" class="btn btn-info mt-auto text-white">Review Settlements</a>
+                    </div>
+                </div>
+            }
+            else if (User.IsInRole("CashAdmin"))
+            {
+                <!-- CASHADMIN CARDS -->
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-3 text-center p-4">
+                        <i class="bi bi-search text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="fw-bold">Student Search</h5>
+                        <p class="text-muted small">Find student accounts and view their wallet status.</p>
+                        <a asp-controller="CashAdmin" asp-action="Dashboard" class="btn btn-primary mt-auto">Search Students</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-3 text-center p-4">
+                        <i class="bi bi-wallet2 text-success mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="fw-bold">Wallet Topup</h5>
+                        <p class="text-muted small">Add balance to student wallets after cash collection.</p>
+                        <a asp-controller="CashAdmin" asp-action="TopUpWallet" class="btn btn-success mt-auto">Topup Wallet</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-3 text-center p-4">
+                        <i class="bi bi-bank text-info mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="fw-bold">Settlement Requests</h5>
+                        <p class="text-muted small">Request cash settlement to SuperAdmin and view history.</p>
+                        <a asp-controller="CashAdmin" asp-action="SettlementHistory" class="btn btn-info mt-auto text-white">Settlement Status</a>
+                    </div>
+                </div>
+            }
+            else if (User.IsInRole("DeliveryMan"))
+            {
+                <!-- DELIVERYMAN CARDS -->
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-3 text-center p-4">
+                        <i class="bi bi-speedometer2 text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="fw-bold">Serving Dashboard</h5>
+                        <p class="text-muted small">Overview of active meals ready for serving.</p>
+                        <a asp-controller="DeliveryMan" asp-action="Dashboard" class="btn btn-primary mt-auto">Go to Dashboard</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-3 text-center p-4">
+                        <i class="bi bi-qr-code-scan text-success mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="fw-bold">Verify Token</h5>
+                        <p class="text-muted small">Scan or enter student OTP to verify and redeem tokens.</p>
+                        <a asp-controller="DeliveryMan" asp-action="VerifyToken" class="btn btn-success mt-auto">Verify Token</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-3 text-center p-4">
+                        <i class="bi bi-clock-history text-info mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="fw-bold">Serving History</h5>
+                        <p class="text-muted small">View log of recently served meals and redeemed tokens.</p>
+                        <a asp-controller="DeliveryMan" asp-action="ServingHistory" class="btn btn-info mt-auto text-white">View History</a>
+                    </div>
+                </div>
+            }
+            else if (User.IsInRole("Student"))
+            {
+                <!-- STUDENT CARDS -->
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-3 text-center p-4">
+                        <i class="bi bi-calendar-check text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="fw-bold">Available Meals</h5>
+                        <p class="text-muted small">Browse meals and purchase tokens using your wallet balance.</p>
+                        <a asp-controller="Student" asp-action="Meals" class="btn btn-primary mt-auto">View Meals</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-3 text-center p-4">
+                        <i class="bi bi-ticket-perforated text-success mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="fw-bold">My Tokens</h5>
+                        <p class="text-muted small">View your purchased tokens and their OTP verification codes.</p>
+                        <a asp-controller="Student" asp-action="MyTokens" class="btn btn-success mt-auto">My Tokens</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-3 text-center p-4">
+                        <i class="bi bi-clock-history text-info mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="fw-bold">Wallet History</h5>
+                        <p class="text-muted small">Track your top-ups and token purchase transactions.</p>
+                        <a asp-controller="Student" asp-action="WalletHistory" class="btn btn-info mt-auto text-white">Transaction History</a>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 }

@@ -1,0 +1,236 @@
+@model SettlementHistoryViewModel
+
+@{
+    ViewData["Title"] = "Settlement History";
+}
+
+<div class="container-fluid py-5">
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold mb-2">Settlement History</h1>
+                    <p class="text-muted">View all settled settlements with audit trail.</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Dashboard", "AdminSettlement")" class="btn btn-outline-secondary">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Total Settlements</p>
+                            <h3 class="fw-bold mb-0">@Model.TotalCount</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Total Amount Settled</p>
+                            <h3 class="fw-bold mb-0 text-success">৳@Model.TotalAmount.ToString("N2")</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Unique CashAdmins</p>
+                            <h3 class="fw-bold mb-0">@Model.Settlements.Select(s => s.CashAdminName).Distinct().Count()</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-3 h-100 bg-light">
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">Average Settlement</p>
+                            <h3 class="fw-bold mb-0">৳@(Model.TotalCount > 0 ? (Model.TotalAmount / Model.TotalCount).ToString("N2") : "0.00")</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Filters</h5>
+                </div>
+                <div class="card-body p-3">
+                    <form method="get" class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label for="cashAdminId" class="form-label">CashAdmin</label>
+                            <select id="cashAdminId" name="cashAdminId" class="form-select">
+                                <option value="">-- All CashAdmins --</option>
+                                @foreach (var admin in Model.AvailableCashAdmins)
+                                {
+                                    <option value="@admin.Id" selected="@(Model.FilterCashAdminId == admin.Id ? "selected" : null)">@admin.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="fromDate" class="form-label">From Date</label>
+                            <input type="date" id="fromDate" name="fromDate" class="form-control" 
+                                   value="@(Model.FilterFromDate?.ToString("yyyy-MM-dd") ?? "")" />
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="toDate" class="form-label">To Date</label>
+                            <input type="date" id="toDate" name="toDate" class="form-control" 
+                                   value="@(Model.FilterToDate?.ToString("yyyy-MM-dd") ?? "")" />
+                        </div>
+
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search"></i> Filter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settlements Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-light border-0 rounded-top-3 p-3">
+                    <h5 class="fw-bold mb-0">Settlement Records</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Settlements.Count == 0)
+                    {
+                        <div class="p-5 text-center text-muted">
+                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                            <p class="mt-3">No settlement records match the selected filters.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Settlement ID</th>
+                                        <th>CashAdmin</th>
+                                        <th>Amount</th>
+                                        <th>Settlement Date</th>
+                                        <th>Received By</th>
+                                        <th>Notes</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var settlement in Model.Settlements.OrderByDescending(s => s.SettlementDate))
+                                    {
+                                        <tr>
+                                            <td class="fw-bold">#@settlement.Id</td>
+                                            <td>@settlement.CashAdminName</td>
+                                            <td>
+                                                <span class="badge bg-success-subtle text-success-emphasis">৳@settlement.Amount.ToString("N2")</span>
+                                            </td>
+                                            <td>
+                                                <small>@settlement.SettlementDate.ToString("MMM dd, yyyy hh:mm tt")<br/>@settlement.TimeAgoSettled</small>
+                                            </td>
+                                            <td>
+                                                <small>@settlement.ReceivedByAdminName</small>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(settlement.Note))
+                                                {
+                                                    <small class="text-muted">@settlement.Note.Substring(0, Math.Min(30, settlement.Note.Length))...</small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailsModal_@settlement.Id">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Details Modal -->
+                                        <div class="modal fade" id="detailsModal_@settlement.Id" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Settlement Details #@settlement.Id</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <label class="form-label text-muted small">CashAdmin</label>
+                                                            <p class="fw-bold">@settlement.CashAdminName</p>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label text-muted small">Amount Settled</label>
+                                                            <p class="fw-bold text-success">৳@settlement.Amount.ToString("N2")</p>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label text-muted small">Settlement Date</label>
+                                                            <p>@settlement.SettlementDate.ToString("MMM dd, yyyy hh:mm tt")</p>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label text-muted small">Received By (SuperAdmin)</label>
+                                                            <p>@settlement.ReceivedByAdminName</p>
+                                                        </div>
+                                                        @if (!string.IsNullOrEmpty(settlement.Note))
+                                                        {
+                                                            <div class="mb-3">
+                                                                <label class="form-label text-muted small">Approval Notes</label>
+                                                                <p class="text-muted">@settlement.Note</p>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle"></i>
+                <strong>Settlements are permanent records.</strong> Each settlement represents approved cash handover to a CashAdmin and is immutable for audit purposes.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
