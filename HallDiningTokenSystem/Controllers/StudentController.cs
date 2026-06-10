@@ -203,14 +203,24 @@ namespace HallDiningTokenSystem.Controllers
                 CurrentBalance = wallet.Balance,
                 Transactions = wallet.Transactions
                     .OrderByDescending(t => t.CreatedAt)
-                    .Select(t => new WalletHistoryViewModel.TransactionItem
+                    .Select((t, index) =>
                     {
-                        TransactionId = t.Id,
-                        Date = t.CreatedAt,
-                        Type = t.TransactionType,
-                        Amount = t.Amount,
-                        Description = t.Description,
-                        RunningBalance = 0
+                        var balance = wallet.Balance;
+                        var transactions = wallet.Transactions.OrderByDescending(x => x.CreatedAt).ToList();
+                        for (int i = 0; i < index; i++)
+                        {
+                            var prev = transactions[i];
+                            balance -= (prev.TransactionType == "Credit" ? prev.Amount : -prev.Amount);
+                        }
+                        return new WalletHistoryViewModel.TransactionItem
+                        {
+                            TransactionId = t.Id,
+                            Date = t.CreatedAt,
+                            Type = t.TransactionType,
+                            Amount = t.Amount,
+                            Description = t.Description,
+                            RunningBalance = balance
+                        };
                     }).ToList()
             };
 
